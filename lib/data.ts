@@ -10,6 +10,7 @@ export type VotingCategory = {
   name: string
   description: string
   icon: string
+  image: string
   contestants: Contestant[]
 }
 
@@ -30,6 +31,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Tech Rising Star of the Year",
     description: "Celebrating the most outstanding rising tech talent of the year",
     icon: "star",
+    image: "/tech_rising.jpeg",
     contestants: [
       { id: "trs-1", name: "Adebimpe Abdulsalam", tagline: "TechSage", initial: "A" },
       { id: "trs-2", name: "Sulaiman Abdussamad", tagline: "Codex", initial: "S" },
@@ -41,6 +43,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Social Impact Award",
     description: "Honouring those who made a meaningful difference in the community",
     icon: "award",
+    image: "/social_impact.jpeg",
     contestants: [
       { id: "si-1", name: "Ojo Samson", tagline: "SF", initial: "O" },
       { id: "si-2", name: "Oladipupo Angel", tagline: "She", initial: "O" },
@@ -53,6 +56,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Cruise Commander of the Year",
     description: "Recognising the life of the party who kept everyone entertained",
     icon: "headphones",
+    image: "/cruise.jpeg",
     contestants: [
       { id: "cc-1", name: "Iyanda Sodiq", tagline: "Luccavelli", initial: "I" },
       { id: "cc-2", name: "Olobaniyi Robert", tagline: "", initial: "O" },
@@ -65,6 +69,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Most Coordinated and Reserved",
     description: "Celebrating the most put-together and composed individual",
     icon: "group",
+    image: "/most_coordinated.jpeg",
     contestants: [
       { id: "mc-1", name: "Farinola Anthonia", tagline: "", initial: "F" },
       { id: "mc-2", name: "Azeez Oluwapelumi", tagline: "", initial: "A" },
@@ -77,6 +82,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Footballer of the Year",
     description: "Honouring the standout footballer of the year",
     icon: "star",
+    image: "/football.jpeg",
     contestants: [
       { id: "foty-1", name: "Al-ameen Bhadmus", tagline: "", initial: "A" },
       { id: "foty-2", name: "Elijah Olakeji", tagline: "Bayu", initial: "E" },
@@ -89,6 +95,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Entrepreneur of the Year",
     description: "Celebrating the most driven and innovative entrepreneur",
     icon: "mic",
+    image: "/entrepreneur.jpeg",
     contestants: [
       { id: "enty-1", name: "Ifeoluwa Esther", tagline: "", initial: "I" },
       { id: "enty-2", name: "Oklebe Sharon", tagline: "", initial: "O" },
@@ -100,6 +107,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Outstanding Leadership",
     description: "Recognising exceptional leadership and influence",
     icon: "award",
+    image: "/outstanding_leader.jpeg",
     contestants: [
       { id: "ol-1", name: "Bamigbade Abdulsalam", tagline: "", initial: "B" },
       { id: "ol-2", name: "Taiwo Priscilla", tagline: "", initial: "T" },
@@ -111,6 +119,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Scholar of the Year",
     description: "Honouring academic excellence and intellectual achievement",
     icon: "mic2",
+    image: "/scholar.jpeg",
     contestants: [
       { id: "soty-1", name: "Adebimpe Abdulsalam", tagline: "", initial: "A" },
       { id: "soty-2", name: "Adedokun Mubarak", tagline: "", initial: "A" },
@@ -123,6 +132,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Most Friendly",
     description: "Celebrating the warmest and most welcoming personality",
     icon: "group",
+    image: "/most_friendly.jpeg",
     contestants: [
       { id: "mf-1", name: "Ojo Samson", tagline: "", initial: "O" },
       { id: "mf-2", name: "Ifeoluwa Esther", tagline: "", initial: "I" },
@@ -135,6 +145,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Most Beautiful",
     description: "Recognising grace, elegance, and natural beauty",
     icon: "mic2",
+    image: "/most_beautiful.jpeg",
     contestants: [
       { id: "mb-1", name: "Taiwo Priscilla", tagline: "", initial: "T" },
       { id: "mb-2", name: "Kegbeyale Rebecca", tagline: "", initial: "K" },
@@ -146,6 +157,7 @@ export const votingCategories: VotingCategory[] = [
     name: "Most Handsome",
     description: "Celebrating the most dashing and stylish gentleman",
     icon: "mic",
+    image: "/most_handsome.jpeg",
     contestants: [
       { id: "mh-1", name: "Ajayi Farouk", tagline: "", initial: "A" },
       { id: "mh-2", name: "Akintunde Michael", tagline: "", initial: "A" },

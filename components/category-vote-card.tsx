@@ -125,7 +125,7 @@ export function CategoryVoteCard({ category, index }: Props) {
         <div className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_oklch(0.745_0.14_86/0.08)]">
           <div className="relative h-44 w-full overflow-hidden">
             <Image
-              src="/image.png"
+              src={category.image}
               alt={category.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -176,7 +176,7 @@ export function CategoryVoteCard({ category, index }: Props) {
       </DialogTrigger>
 
       {/* ── Dialog ────────────────────────────────────── */}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
         {step === "success" ? (
           <div className="flex flex-col items-center gap-3 p-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15">
@@ -198,9 +198,9 @@ export function CategoryVoteCard({ category, index }: Props) {
         ) : (
           <div className="flex flex-col sm:flex-row">
             {/* Left image */}
-            <div className="relative hidden sm:block w-56 shrink-0">
+            <div className="relative hidden sm:block w-72 shrink-0">
               <Image
-                src="/image.png"
+                src={category.image}
                 alt={category.name}
                 fill
                 className="object-cover rounded-l-2xl"

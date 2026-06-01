@@ -1,15 +1,15 @@
-import { HugeiconsIcon } from "@hugeicons/react"
-import { FireIcon } from "@hugeicons/core-free-icons"
-import Navbar from "@/components/layout/navbar"
-import Footer from "@/components/layout/footer"
-import { CategoryVoteCard } from "@/components/category-vote-card"
-import { AnimateIn } from "@/components/animate-in"
-import { votingCategories } from "@/lib/data"
+import { HugeiconsIcon } from "@hugeicons/react";
+import { FireIcon } from "@hugeicons/core-free-icons";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
+import { CategoryVoteCard } from "@/components/category-vote-card";
+import { AnimateIn } from "@/components/animate-in";
+import { votingCategories } from "@/lib/data";
 
 export const metadata = {
   title: "Vote — Dinner Night Awards 2026",
   description: "Cast your vote for the nominees across all 6 award categories.",
-}
+};
 
 export default function VotingPage() {
   return (
@@ -30,11 +30,17 @@ export default function VotingPage() {
             <HugeiconsIcon icon={FireIcon} size={12} color="currentColor" />
             Voting is now open
           </div>
-          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-extrabold tracking-tighter text-white">
+          <h1
+            className="text-[clamp(2.5rem,8vw,5rem)] font-extrabold tracking-tighter text-white"
+            style={{
+              fontFamily: "var(--font-display)",
+            }}
+          >
             Cast Your <span className="text-primary">Vote</span>
           </h1>
           <p className="mt-4 text-sm text-white/40 max-w-md mx-auto leading-relaxed">
-            Click any category below, choose your favourite nominee, and cast your vote. ₦50 per vote · minimum ₦100.
+            Click any category below, choose your favourite nominee, and cast
+            your vote. ₦50 per vote · minimum ₦100.
           </p>
         </div>
       </section>
@@ -54,5 +60,5 @@ export default function VotingPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

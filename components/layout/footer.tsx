@@ -4,7 +4,6 @@ import {
   SparklesIcon,
   Location01Icon,
   Calendar01Icon,
-  Mail01Icon,
 } from "@hugeicons/core-free-icons";
 
 const quickLinks = [
@@ -28,13 +27,11 @@ export default function Footer() {
                 className="text-primary"
               />
               <span className="text-sm font-extrabold tracking-[0.2em] text-white">
-                DINNER <span className="text-primary">NIGHT</span>
+                CSC'29
               </span>
             </Link>
             <p className="text-xs text-white/30 leading-relaxed max-w-xs">
-              The Annual Dinner Night Awards celebrates excellence in music and
-              entertainment. An unforgettable evening of glamour and
-              recognition.
+              CSC&apos;29 Dinner &amp; Award Night — celebrating excellence, talent, and achievement. An unforgettable evening of glamour and recognition.
             </p>
           </div>
 
