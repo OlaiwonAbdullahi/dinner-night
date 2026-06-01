@@ -2,54 +2,31 @@ import { prisma } from "@/lib/prisma";
 import { votingCategories } from "@/lib/data";
 
 async function getStats() {
-  const [totalVoteCount, voteRevenue, totalTicketCount, ticketRevenue] =
-    await Promise.all([
-      prisma.vote.count({ where: { status: "paid" } }),
-      prisma.vote.aggregate({
-        where: { status: "paid" },
-        _sum: { quantity: true, amount: true },
-      }),
-      prisma.ticket.count({ where: { status: "paid" } }),
-      prisma.ticket.aggregate({
-        where: { status: "paid" },
-        _sum: { amount: true },
-      }),
-    ]);
-
-  // Fetch topVotes with retries and graceful fallback to avoid crashing the whole page
-  async function fetchTopVotesWithRetry(attempts = 3) {
-    let lastErr: unknown = null;
-    for (let i = 0; i < attempts; i++) {
-      try {
-        return await prisma.vote.groupBy({
-          by: ["categoryId", "contestantId"],
-          where: { status: "paid" },
-          _sum: { quantity: true },
-          orderBy: { _sum: { quantity: "desc" } },
-          take: 5,
-        });
-      } catch (err) {
-        lastErr = err;
-        // small exponential backoff
-        const wait = 300 * (i + 1);
-        // eslint-disable-next-line no-await-in-loop
-        await new Promise((res) => setTimeout(res, wait));
-        console.error(`vote.groupBy attempt ${i + 1} failed`, err);
-      }
-    }
-    throw lastErr;
-  }
-
-  let topVotes = [];
-  try {
-    topVotes = await fetchTopVotesWithRetry(3);
-  } catch (err) {
-    // Log and continue with an empty result set so the admin page remains responsive
-    // The underlying error (connection/timeout) should be investigated separately.
-    // eslint-disable-next-line no-console
-    console.error("Failed to fetch topVotes after retries:", err);
-    topVotes = [];
-  }
+  const [
+    totalVoteCount,
+    voteRevenue,
+    totalTicketCount,
+    ticketRevenue,
+    topVotes,
+  ] = await Promise.all([
+    prisma.vote.count({ where: { status: "paid" } }),
+    prisma.vote.aggregate({
+      where: { status: "paid" },
+      _sum: { quantity: true, amount: true },
+    }),
+    prisma.ticket.count({ where: { status: "paid" } }),
+    prisma.ticket.aggregate({
+      where: { status: "paid" },
+      _sum: { amount: true },
+    }),
+    prisma.vote.groupBy({
+      by: ["categoryId", "contestantId"],
+      where: { status: "paid" },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take: 5,
+    }),
+  ]);
 
   return {
     totalVoteCount,
