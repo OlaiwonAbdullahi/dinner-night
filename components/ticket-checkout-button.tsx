@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle01Icon } from "@hugeicons/core-free-icons"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -27,6 +28,7 @@ export function TicketCheckoutButton({
   ctaLabel,
   highlighted,
 }: Props) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>("checkout")
   const [paystackRef, setPaystackRef] = useState<string | null>(null)
@@ -93,6 +95,8 @@ export function TicketCheckoutButton({
         throw new Error(d.error ?? "Failed to record ticket")
       }
       setStep("success")
+      // Redirect to receipt page after short delay
+      setTimeout(() => router.push(`/tickets/receipt/${reference}`), 1200)
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong")
       setStep("checkout")
