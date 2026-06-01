@@ -3,6 +3,7 @@ import { FireIcon } from "@hugeicons/core-free-icons"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { CategoryVoteCard } from "@/components/category-vote-card"
+import { AnimateIn } from "@/components/animate-in"
 import { votingCategories } from "@/lib/data"
 
 export const metadata = {
@@ -43,7 +44,9 @@ export default function VotingPage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {votingCategories.map((cat, idx) => (
-              <CategoryVoteCard key={cat.id} category={cat} index={idx} />
+              <AnimateIn key={cat.id} delay={(idx % 3) * 100} direction="up">
+                <CategoryVoteCard category={cat} index={idx} />
+              </AnimateIn>
             ))}
           </div>
         </div>

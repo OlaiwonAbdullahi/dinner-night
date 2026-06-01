@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Vote {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId   String
+  contestantId String
+  quantity     Int
+  amount       Int
+  email        String
+  name         String
+  phone        String
+  reference    String   @unique
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([categoryId, contestantId])
+  @@index([status])
+}
+
+model Ticket {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tierId    String
+  email     String
+  name      String
+  phone     String
+  quantity  Int
+  amount    Int
+  reference String   @unique
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}

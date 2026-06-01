@@ -1,32 +1,31 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle01Icon, ThumbsUpIcon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { VotingCategory } from "@/lib/data"
 
-type VoteResult = {
-  contestantId: string
-  percentages: Record<string, number>
+function avatarUrl(name: string) {
+  return `https://tapback.co/api/avatar/${encodeURIComponent(name)}.webp`
 }
 
-function generatePercentages(
+function toPercentages(
   contestants: VotingCategory["contestants"],
-  votedId: string
+  totals: Record<string, number>
 ): Record<string, number> {
-  const weights = contestants.map((c) =>
-    c.id === votedId ? Math.random() * 30 + 25 : Math.random() * 25 + 5
-  )
-  const total = weights.reduce((a, b) => a + b, 0)
+  const grand = contestants.reduce((sum, c) => sum + (totals[c.id] ?? 0), 0)
+  if (grand === 0) return {}
   const result: Record<string, number> = {}
   let remaining = 100
   contestants.forEach((c, i) => {
     if (i === contestants.length - 1) {
-      result[c.id] = remaining
+      result[c.id] = Math.max(0, remaining)
     } else {
-      const pct = Math.round((weights[i] / total) * 100)
+      const pct = Math.round(((totals[c.id] ?? 0) / grand) * 100)
       result[c.id] = pct
       remaining -= pct
     }
@@ -35,112 +34,119 @@ function generatePercentages(
 }
 
 export function VotingSection({ category }: { category: VotingCategory }) {
-  const storageKey = `vote_${category.id}`
-  const [voteResult, setVoteResult] = useState<VoteResult | null>(null)
-  const [mounted, setMounted] = useState(false)
+  const [voteTotals, setVoteTotals] = useState<Record<string, number>>({})
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setMounted(true)
-    const stored = localStorage.getItem(storageKey)
-    if (stored) {
-      try {
-        setVoteResult(JSON.parse(stored))
-      } catch {
-        // ignore invalid stored data
-      }
-    }
-  }, [storageKey])
+    fetch("/api/votes/results")
+      .then((r) => r.json())
+      .then((data: Record<string, Record<string, number>>) => {
+        setVoteTotals(data[category.id] ?? {})
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [category.id])
 
-  function handleVote(contestantId: string) {
-    if (voteResult) return
-    const percentages = generatePercentages(category.contestants, contestantId)
-    const result: VoteResult = { contestantId, percentages }
-    setVoteResult(result)
-    localStorage.setItem(storageKey, JSON.stringify(result))
-  }
+  const percentages = toPercentages(category.contestants, voteTotals)
+  const hasVotes = Object.keys(voteTotals).length > 0
+  const leaderId = hasVotes
+    ? category.contestants.reduce((best, c) =>
+        (voteTotals[c.id] ?? 0) > (voteTotals[best] ?? 0) ? c.id : best,
+        category.contestants[0].id
+      )
+    : null
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {category.contestants.map((contestant) => {
-        const hasVoted = !!voteResult
-        const isVoted = voteResult?.contestantId === contestant.id
-        const pct = voteResult?.percentages[contestant.id] ?? 0
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {category.contestants.map((contestant) => {
+          const isLeader = leaderId === contestant.id && hasVotes
+          const pct = percentages[contestant.id] ?? 0
+          const voteCount = voteTotals[contestant.id] ?? 0
 
-        return (
-          <div
-            key={contestant.id}
-            className={cn(
-              "relative flex flex-col items-center rounded-2xl border p-6 transition-all duration-300",
-              isVoted
-                ? "border-primary/60 bg-primary/5 shadow-[0_0_24px_oklch(0.745_0.14_86/0.12)]"
-                : "border-white/10 bg-card",
-              hasVoted && !isVoted && "opacity-50"
-            )}
-          >
-            {isVoted && (
-              <span className="absolute top-3 right-3">
-                <HugeiconsIcon
-                  icon={CheckmarkCircle01Icon}
-                  size={18}
-                  color="currentColor"
-                  className="text-primary"
-                />
-              </span>
-            )}
-
-            {/* Avatar */}
+          return (
             <div
+              key={contestant.id}
               className={cn(
-                "mb-4 flex h-20 w-20 items-center justify-center rounded-full text-2xl font-extrabold tracking-tight select-none",
-                isVoted
-                  ? "bg-primary text-black"
-                  : "bg-primary/10 text-primary border border-primary/20"
+                "relative flex flex-col items-center rounded-2xl border p-6 transition-all duration-300",
+                isLeader
+                  ? "border-primary/60 bg-primary/5 shadow-[0_0_24px_oklch(0.745_0.14_86/0.12)]"
+                  : "border-white/10 bg-card"
               )}
             >
-              {contestant.initial}
-            </div>
-
-            <h3 className="text-center text-sm font-bold text-white leading-tight">
-              {contestant.name}
-            </h3>
-            <p className="mt-1 mb-5 text-center text-xs text-white/40 leading-snug">
-              {contestant.tagline}
-            </p>
-
-            {mounted && hasVoted ? (
-              <div className="w-full">
-                <div className="mb-1.5 flex justify-between text-xs">
-                  <span className={cn("font-medium", isVoted ? "text-primary" : "text-white/30")}>
-                    {isVoted ? "Your vote" : "Votes"}
-                  </span>
-                  <span className={cn("font-bold", isVoted ? "text-primary" : "text-white/30")}>
-                    {pct}%
-                  </span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className={cn(
-                      "h-full rounded-full transition-all duration-700",
-                      isVoted ? "bg-primary" : "bg-white/20"
-                    )}
-                    style={{ width: `${pct}%` }}
+              {isLeader && (
+                <span className="absolute top-3 right-3">
+                  <HugeiconsIcon
+                    icon={CheckmarkCircle01Icon}
+                    size={18}
+                    color="currentColor"
+                    className="text-primary"
                   />
-                </div>
+                </span>
+              )}
+
+              {/* Avatar */}
+              <div className="relative mb-4 h-20 w-20 overflow-hidden rounded-full border-2 border-white/10">
+                <img
+                  src={avatarUrl(contestant.name)}
+                  alt={contestant.name}
+                  className="h-full w-full object-cover"
+                />
               </div>
-            ) : (
-              <Button
-                size="sm"
-                className="w-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary hover:text-black font-semibold transition-all"
-                onClick={() => handleVote(contestant.id)}
-                disabled={!mounted}
-              >
-                <HugeiconsIcon icon={ThumbsUpIcon} size={14} color="currentColor" />
-                Vote
-              </Button>
-            )}
-          </div>
-        )
-      })}
+
+              <h3 className="text-center text-sm font-bold text-white leading-tight">
+                {contestant.name}
+              </h3>
+              <p className="mt-1 mb-5 text-center text-xs text-white/40 leading-snug">
+                {contestant.tagline}
+              </p>
+
+              {!loading && hasVotes ? (
+                <div className="w-full">
+                  <div className="mb-1.5 flex justify-between text-xs">
+                    <span className={cn("font-medium", isLeader ? "text-primary" : "text-white/30")}>
+                      {voteCount.toLocaleString()} vote{voteCount !== 1 ? "s" : ""}
+                    </span>
+                    <span className={cn("font-bold", isLeader ? "text-primary" : "text-white/30")}>
+                      {pct}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-700",
+                        isLeader ? "bg-primary" : "bg-white/20"
+                      )}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  className="w-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary hover:text-black font-semibold transition-all"
+                  asChild
+                >
+                  <Link href="/voting">
+                    <HugeiconsIcon icon={ThumbsUpIcon} size={14} color="currentColor" />
+                    Vote
+                  </Link>
+                </Button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {!hasVotes && !loading && (
+        <p className="text-center text-xs text-white/25">
+          No votes yet — be the first to vote on the{" "}
+          <Link href="/voting" className="text-primary underline-offset-2 hover:underline">
+            voting page
+          </Link>
+          .
+        </p>
+      )}
     </div>
   )
 }

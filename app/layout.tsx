@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Figtree, Cormorant_Garamond } from "next/font/google";
+import { Geist, Geist_Mono, Figtree, Unbounded } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
-const cormorant = Cormorant_Garamond({
+const unbounded = Unbounded({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 const geistSans = Geist({
@@ -36,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable, cormorant.variable)}
+      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable, unbounded.variable)}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

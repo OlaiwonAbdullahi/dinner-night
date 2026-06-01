@@ -10,9 +10,15 @@ import {
 } from "@hugeicons/core-free-icons"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
-import { Button } from "@/components/ui/button"
+import { TicketCheckoutButton } from "@/components/ticket-checkout-button"
 import { ticketTiers } from "@/lib/data"
 import { cn } from "@/lib/utils"
+
+// Price in kobo (₦1 = 100 kobo)
+const TIER_PRICES_KOBO: Record<string, number> = {
+  regular: 500000,    // ₦5,000
+  volunteer: 1000000, // ₦10,000
+}
 
 export const metadata = {
   title: "Tickets — Dinner Night Awards 2026",
@@ -122,17 +128,14 @@ export default function TicketsPage() {
                   </ul>
 
                   {/* CTA */}
-                  <Button
-                    size="sm"
-                    className={cn(
-                      "w-full font-bold tracking-wide",
-                      tier.highlighted
-                        ? "bg-primary text-black hover:bg-primary/80"
-                        : "border border-primary/30 bg-transparent text-primary hover:bg-primary/10"
-                    )}
-                  >
-                    {tier.cta}
-                  </Button>
+                  <TicketCheckoutButton
+                    tierId={tier.id}
+                    tierName={tier.name}
+                    priceLabel={tier.price}
+                    priceKobo={TIER_PRICES_KOBO[tier.id] ?? 500000}
+                    ctaLabel={tier.cta}
+                    highlighted={tier.highlighted}
+                  />
                 </div>
               )
             })}
@@ -177,9 +180,12 @@ export default function TicketsPage() {
           <p className="text-sm text-white/40 mb-6 max-w-md mx-auto">
             Seats are filling up fast. Secure your spot at the most glamorous event of the year.
           </p>
-          <Button className="bg-primary text-black hover:bg-primary/80 font-bold tracking-wider px-8">
-            <Link href="#tickets">Get Your Ticket Now</Link>
-          </Button>
+          <Link
+            href="#tickets"
+            className="inline-flex h-10 items-center justify-center rounded-4xl bg-primary px-8 text-sm font-bold tracking-wider text-black hover:bg-primary/80 transition-colors"
+          >
+            Get Your Ticket Now
+          </Link>
         </div>
       </section>
 
