@@ -18,7 +18,7 @@ export default async function TicketReceiptPage({
   const ticketNumber = reference.slice(-8).toUpperCase();
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
-    "https://dinner-night.vercel.app";
+    "https://dinner.eventsnest.xyz";
   const verificationUrl = `${appUrl}/verify/${encodeURIComponent(reference)}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&color=D4AF37&bgcolor=0d0d0d&data=${encodeURIComponent(verificationUrl)}`;
 
