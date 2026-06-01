@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { votingCategories } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [
     totalVoteCount,
