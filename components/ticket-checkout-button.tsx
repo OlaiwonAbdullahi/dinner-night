@@ -1,44 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle01Icon } from "@hugeicons/core-free-icons"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { CheckoutForm, type CheckoutValues } from "@/components/checkout-form"
-import { PaystackButton } from "@/components/paystack-button"
 
-type Step = "checkout" | "pay" | "success"
+declare global {
+  interface Window {
+    PaystackPop: {
+      setup: (config: {
+        key: string
+        email: string
+        amount: number
+        ref: string
+        onClose: () => void
+        callback: (r: { reference: string }) => void
+      }) => { openIframe: () => void }
+    }
+  }
+}
+
+type Step = "checkout" | "paying" | "success"
 
 type Props = {
   tierId: string
   tierName: string
-  priceLabel: string     // e.g. "₦5,000"
-  priceKobo: number      // e.g. 500000
+  priceLabel: string
+  priceKobo: number
   ctaLabel: string
   highlighted?: boolean
 }
 
 export function TicketCheckoutButton({
-  tierId,
-  tierName,
-  priceLabel,
-  priceKobo,
-  ctaLabel,
-  highlighted,
+  tierId, tierName, priceLabel, priceKobo, ctaLabel, highlighted,
 }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>("checkout")
-  const [paystackRef, setPaystackRef] = useState<string | null>(null)
   const [checkoutValues, setCheckoutValues] = useState<CheckoutValues | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const paystackRef = useRef<string | null>(null)
 
   function resetDialog() {
     setStep("checkout")
-    setPaystackRef(null)
+    paystackRef.current = null
     setCheckoutValues(null)
     setIsLoading(false)
     setErrorMsg(null)
@@ -46,8 +55,41 @@ export function TicketCheckoutButton({
 
   function handleOpenChange(v: boolean) {
     setOpen(v)
-    if (!v) resetDialog()
+    if (!v && step !== "paying" && step !== "success") {
+      resetDialog()
+    }
   }
+
+  // Close dialog → then trigger Paystack
+  useEffect(() => {
+    if (!open && step === "paying" && paystackRef.current && checkoutValues) {
+      const ref = paystackRef.current
+      const email = checkoutValues.email
+      const timer = setTimeout(() => {
+        if (!window.PaystackPop) {
+          setErrorMsg("Payment system not loaded. Please refresh and try again.")
+          setStep("checkout")
+          setOpen(true)
+          return
+        }
+        window.PaystackPop.setup({
+          key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+          email,
+          amount: priceKobo,
+          ref,
+          onClose: () => {
+            setStep("checkout")
+            setOpen(true)
+          },
+          callback: (response) => {
+            void handlePaymentSuccess(response.reference)
+          },
+        }).openIframe()
+      }, 350)
+      return () => clearTimeout(timer)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, step])
 
   async function handleCheckoutSubmit(values: CheckoutValues) {
     setIsLoading(true)
@@ -65,8 +107,9 @@ export function TicketCheckoutButton({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Failed to initialize payment")
       setCheckoutValues(values)
-      setPaystackRef(data.reference)
-      setStep("pay")
+      paystackRef.current = data.reference
+      setStep("paying")
+      setOpen(false) // ← close dialog so Paystack is not blocked
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -75,7 +118,6 @@ export function TicketCheckoutButton({
   }
 
   async function handlePaymentSuccess(reference: string) {
-    setIsLoading(true)
     try {
       const res = await fetch("/api/tickets", {
         method: "POST",
@@ -95,13 +137,12 @@ export function TicketCheckoutButton({
         throw new Error(d.error ?? "Failed to record ticket")
       }
       setStep("success")
-      // Redirect to receipt page after short delay
+      // Redirect to receipt after short delay
       setTimeout(() => router.push(`/tickets/receipt/${reference}`), 1200)
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Something went wrong")
+    } catch {
+      setErrorMsg("Payment received but ticket recording failed. Please contact support.")
       setStep("checkout")
-    } finally {
-      setIsLoading(false)
+      setOpen(true)
     }
   }
 
@@ -125,9 +166,7 @@ export function TicketCheckoutButton({
           <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-primary/60 uppercase">
             {tierName} Ticket
           </div>
-          <DialogTitle className="text-lg">
-            Complete Your Purchase
-          </DialogTitle>
+          <DialogTitle>Complete Your Purchase</DialogTitle>
         </DialogHeader>
 
         <div className="mb-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/3 px-4 py-3">
@@ -141,52 +180,32 @@ export function TicketCheckoutButton({
           </p>
         )}
 
-        {step === "success" ? (
-          <div className="flex flex-col items-center gap-3 py-4 text-center">
+        {step === "success" && (
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15">
               <HugeiconsIcon icon={CheckmarkCircle01Icon} size={30} color="currentColor" className="text-primary" />
             </div>
             <p className="text-base font-bold text-white">Ticket Confirmed!</p>
             <p className="text-sm text-white/40">
-              Your <span className="text-primary font-semibold">{tierName}</span> ticket has been booked. Check your email for details.
+              Redirecting to your ticket…
             </p>
-            <Button
-              className="mt-2 bg-primary text-black hover:bg-primary/80 font-bold"
-              onClick={() => setOpen(false)}
-            >
-              Done
-            </Button>
           </div>
-        ) : step === "checkout" ? (
+        )}
+
+        {step === "paying" && (
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+            <p className="text-sm text-white/50">Opening payment…</p>
+          </div>
+        )}
+
+        {step === "checkout" && (
           <CheckoutForm
             totalLabel={priceLabel}
             isLoading={isLoading}
             onBack={() => setOpen(false)}
             onSubmit={handleCheckoutSubmit}
           />
-        ) : (
-          paystackRef && checkoutValues && (
-            <div className="flex flex-col gap-4">
-              <p className="text-sm text-white/40">
-                Complete your <span className="font-bold text-primary">{priceLabel}</span> payment securely via Paystack.
-              </p>
-              <PaystackButton
-                email={checkoutValues.email}
-                amount={priceKobo}
-                reference={paystackRef}
-                label={`Pay ${priceLabel}`}
-                onSuccess={handlePaymentSuccess}
-                onClose={() => setStep("checkout")}
-                disabled={isLoading}
-              />
-              <button
-                onClick={() => setStep("checkout")}
-                className="text-xs text-white/30 hover:text-white/60 transition-colors"
-              >
-                ← Back
-              </button>
-            </div>
-          )
         )}
       </DialogContent>
     </Dialog>

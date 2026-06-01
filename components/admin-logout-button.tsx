@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Logout01Icon } from "@hugeicons/core-free-icons"
+import { useRouter } from "next/navigation";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Logout01Icon } from "@hugeicons/core-free-icons";
 
 export function AdminLogoutButton() {
-  const router = useRouter()
+  const router = useRouter();
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" })
-    router.push("/admin/login")
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.push("/login");
   }
 
   return (
@@ -20,5 +20,5 @@ export function AdminLogoutButton() {
       <HugeiconsIcon icon={Logout01Icon} size={16} color="currentColor" />
       Logout
     </button>
-  )
+  );
 }

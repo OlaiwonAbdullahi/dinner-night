@@ -41,7 +41,7 @@ export function HeroSection() {
           className="mb-6 leading-[1] tracking-tighter text-white"
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.8rem, 11vw, 7rem)",
+            fontSize: "clamp(1.6rem, 8vw, 6rem)",
             fontWeight: 800,
           }}
         >
@@ -62,25 +62,27 @@ export function HeroSection() {
             June 18, 2026
           </span>
           <span className="hidden sm:block h-4 w-px bg-primary/20" />
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2 ">
             <HugeiconsIcon
               icon={Location01Icon}
               size={15}
               color="currentColor"
               className="text-primary"
             />
-            Antimaggies event center, Yoaco Ogbomosho
+            <span className="text-nowrap">
+              Antimaggies event center, Yoaco Ogbomosho
+            </span>
           </span>
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex  gap-3 flex-row">
           <Button
             size="lg"
             asChild
             className="bg-primary text-black hover:bg-primary/80 font-bold tracking-wider px-8"
           >
-            <Link href="/voting">Cast Your Vote</Link>
+            <Link href="/voting">Vote</Link>
           </Button>
           <Button
             size="lg"

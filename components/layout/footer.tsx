@@ -20,18 +20,14 @@ export default function Footer() {
           {/* Brand */}
           <div className="sm:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <HugeiconsIcon
-                icon={SparklesIcon}
-                size={16}
-                color="currentColor"
-                className="text-primary"
-              />
               <span className="text-sm font-extrabold tracking-[0.2em] text-white">
                 CSC'29
               </span>
             </Link>
             <p className="text-xs text-white/30 leading-relaxed max-w-xs">
-              CSC&apos;29 Dinner &amp; Award Night — celebrating excellence, talent, and achievement. An unforgettable evening of glamour and recognition.
+              CSC&apos;29 Dinner &amp; Award Night — celebrating excellence,
+              talent, and achievement. An unforgettable evening of glamour and
+              recognition.
             </p>
           </div>
 
