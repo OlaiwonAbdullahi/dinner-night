@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { votingCategories } from "@/lib/data";
+import { RefreshButton } from "@/components/admin-refresh-button";
 
 export const dynamic = "force-dynamic";
 
@@ -81,11 +82,12 @@ export default async function AdminOverviewPage() {
 
   return (
     <div className="p-6 md:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-white">Overview</h1>
-        <p className="mt-1 text-sm text-white/40">
-          Live dashboard — Dinner Night Awards 2026
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">Overview</h1>
+          <p className="mt-1 text-sm text-white/40">Live dashboard — Dinner Night Awards 2026</p>
+        </div>
+        <RefreshButton />
       </div>
 
       {/* Stat cards */}

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { votingCategories } from "@/lib/data"
+import { RefreshButton } from "@/components/admin-refresh-button"
 
 export const dynamic = "force-dynamic"
 
@@ -41,8 +42,9 @@ export default async function AdminVotesPage({
           <p className="mt-1 text-sm text-white/40">{votes.length} records shown</p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2">
+        {/* Filters + Refresh */}
+        <div className="flex flex-wrap items-center gap-2">
+          <RefreshButton />
           <a
             href="/admin/votes"
             className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/50 hover:border-primary/30 hover:text-primary transition-all"
