@@ -62,6 +62,7 @@ export function CategoryVoteCard({ category, index }: Props) {
   const [showToast, setShowToast] = useState(false)
   const paystackRef = useRef<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const paymentCallbackFired = useRef(false)
 
   const total = quantity * PRICE_PER_VOTE
   const totalKobo = total * 100
@@ -97,17 +98,21 @@ export function CategoryVoteCard({ category, index }: Props) {
           setOpen(true)
           return
         }
+        paymentCallbackFired.current = false
         window.PaystackPop.setup({
           key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
           email,
           amount: totalKobo,
           ref,
           onClose: () => {
-            // User dismissed Paystack — reopen dialog at checkout step
-            setStep("checkout")
-            setOpen(true)
+            // Paystack fires onClose after callback on success too — only reopen if payment didn't complete
+            if (!paymentCallbackFired.current) {
+              setStep("checkout")
+              setOpen(true)
+            }
           },
           callback: (response) => {
+            paymentCallbackFired.current = true
             void handlePaymentSuccess(response.reference)
           },
         }).openIframe()
@@ -124,7 +129,18 @@ export function CategoryVoteCard({ category, index }: Props) {
       const res = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email, amount: totalKobo }),
+        body: JSON.stringify({
+          email: values.email,
+          amount: totalKobo,
+          metadata: {
+            type: "vote",
+            categoryId: category.id,
+            contestantId: selected,
+            quantity,
+            name: values.name,
+            phone: values.phone ?? "",
+          },
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Failed to initialize payment")
