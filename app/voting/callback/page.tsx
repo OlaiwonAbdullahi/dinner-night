@@ -41,7 +41,13 @@ export default function VotingCallbackPage() {
         try {
           const res = await fetch(`/api/votes?reference=${encodeURIComponent(reference)}`)
           if (res.ok) {
-            const vote: VoteRecord = await res.json()
+            const data = await res.json()
+            // Guard: ensure required fields are present before showing receipt
+            if (!data?.categoryId || data?.quantity == null || data?.amount == null) {
+              await new Promise((r) => setTimeout(r, 2500))
+              continue
+            }
+            const vote: VoteRecord = data
             const cat = votingCategories.find((c) => c.id === vote.categoryId)
             const contestant = cat?.contestants.find((c) => c.id === vote.contestantId)
             if (!cancelled) {
@@ -121,6 +127,7 @@ export default function VotingCallbackPage() {
   }
 
   /* ── Success receipt ── */
+  if (state.status !== "success" || !state.vote) return null
   const { vote, categoryName, contestantName } = state
   return (
     <div className="flex min-h-screen items-center justify-center bg-black px-4 py-12">
