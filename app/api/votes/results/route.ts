@@ -17,7 +17,7 @@ export async function GET() {
     }
 
     return NextResponse.json(results, {
-      headers: { "Cache-Control": "s-maxage=30, stale-while-revalidate=60" },
+      headers: { "Cache-Control": "no-store" },
     })
   } catch (err) {
     console.error("[votes/results]", err)

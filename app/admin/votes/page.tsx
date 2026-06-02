@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { votingCategories } from "@/lib/data"
 
+export const dynamic = "force-dynamic"
+
 function formatNaira(kobo: number) {
   return `₦${(kobo / 100).toLocaleString("en-NG")}`
 }
