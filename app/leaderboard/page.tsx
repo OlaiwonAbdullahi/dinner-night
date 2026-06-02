@@ -3,7 +3,7 @@ import { votingCategories } from "@/lib/data";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { TrophyIcon, StarIcon } from "@hugeicons/core-free-icons";
+import { SparklesIcon, Award01Icon } from "@hugeicons/core-free-icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,7 @@ export default async function LeaderboardPage() {
         />
         <div className="relative mx-auto max-w-6xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-primary uppercase">
-            <HugeiconsIcon icon={TrophyIcon} size={12} color="currentColor" />
+            <HugeiconsIcon icon={Award01Icon} size={12} color="currentColor" />
             Live Standings
           </div>
           <h1
@@ -158,7 +158,7 @@ export default async function LeaderboardPage() {
                 {!hasVotes && (
                   <div className="px-5 pb-4 text-center">
                     <HugeiconsIcon
-                      icon={StarIcon}
+                      icon={SparklesIcon}
                       size={18}
                       color="currentColor"
                       className="mx-auto mb-1.5 text-white/10"
