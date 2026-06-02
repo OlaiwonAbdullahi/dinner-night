@@ -11,7 +11,12 @@ export const metadata = {
   description: "Cast your vote for the nominees across all 6 award categories.",
 };
 
-export default function VotingPage() {
+export default async function VotingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category: openCategory } = await searchParams
   return (
     <div className="flex min-h-full flex-col bg-black text-white">
       <Navbar />
@@ -51,7 +56,11 @@ export default function VotingPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {votingCategories.map((cat, idx) => (
               <AnimateIn key={cat.id} delay={(idx % 3) * 100} direction="up">
-                <CategoryVoteCard category={cat} index={idx} />
+                <CategoryVoteCard
+                  category={cat}
+                  index={idx}
+                  autoOpen={openCategory === cat.id}
+                />
               </AnimateIn>
             ))}
           </div>

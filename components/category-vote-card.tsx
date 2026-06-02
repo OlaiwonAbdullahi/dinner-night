@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -33,15 +33,26 @@ function avatarUrl(name: string) {
 type Props = {
   category: VotingCategory
   index: number
+  autoOpen?: boolean
 }
 
-export function CategoryVoteCard({ category, index }: Props) {
+export function CategoryVoteCard({ category, index, autoOpen }: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>("select")
   const [selected, setSelected] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(MIN_VOTES)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Auto-open when visited via a shared link
+  useEffect(() => {
+    if (!autoOpen) return
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    const t = setTimeout(() => setOpen(true), 450)
+    return () => clearTimeout(t)
+  }, [autoOpen])
 
   const total = quantity * PRICE_PER_VOTE
   const totalKobo = total * 100
@@ -57,6 +68,21 @@ export function CategoryVoteCard({ category, index }: Props) {
   function handleOpenChange(v: boolean) {
     setOpen(v)
     if (!v && step !== "paying") resetDialog()
+  }
+
+  async function handleShare() {
+    const url = `${window.location.origin}/voting?category=${category.id}`
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `Vote: ${category.name}`, url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch {
+      // user cancelled or clipboard unavailable
+    }
   }
 
   async function handleCheckoutSubmit(values: CheckoutValues) {
@@ -110,7 +136,7 @@ export function CategoryVoteCard({ category, index }: Props) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {/* ── Card ── */}
       <DialogTrigger asChild>
-        <div className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_oklch(0.745_0.14_86/0.08)]">
+        <div ref={cardRef} className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_oklch(0.745_0.14_86/0.08)]">
           <div className="relative h-44 w-full overflow-hidden">
             <Image
               src={category.image}
@@ -184,9 +210,17 @@ export function CategoryVoteCard({ category, index }: Props) {
             </DialogHeader>
 
             <div className="mt-4 mb-5 flex items-center justify-between">
-              <button className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/50 hover:border-primary/30 hover:text-primary transition-all">
+              <button
+                onClick={handleShare}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all",
+                  copied
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"
+                )}
+              >
                 <HugeiconsIcon icon={Share01Icon} size={13} color="currentColor" />
-                Share
+                {copied ? "Copied!" : "Share"}
               </button>
               <div className="text-right">
                 <span className="text-xs text-white/30">per vote</span>
