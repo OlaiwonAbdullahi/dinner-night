@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  SparklesIcon,
   Menu01Icon,
   Cancel01Icon,
 } from "@hugeicons/core-free-icons";
@@ -15,7 +14,6 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/voting", label: "Vote" },
-  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/tickets", label: "Tickets" },
 ];
 
@@ -61,7 +59,7 @@ export default function Navbar() {
                 className="text-xs font-extrabold tracking-[0.22em] text-white"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                CSC'29
+                CSC&apos;29
               </span>
             </Link>
 
