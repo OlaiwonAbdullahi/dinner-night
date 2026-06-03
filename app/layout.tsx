@@ -22,9 +22,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dinner.eventsnest.xyz"),
   title: "Dinner Night Awards 2026",
   description:
     "Vote for your favourite nominees and secure your tickets for the Annual Dinner Night Awards 2026 — An Evening of Excellence & Glamour.",
+  openGraph: {
+    title: "Dinner Night Awards 2026",
+    description:
+      "Vote for your favourite nominees and secure your tickets for the Annual Dinner Night Awards 2026 — An Evening of Excellence & Glamour.",
+    url: "https://dinner.eventsnest.xyz",
+    siteName: "Dinner Night Awards 2026",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dinner Night Awards 2026",
+    description:
+      "Vote for your favourite nominees and secure your tickets for the Annual Dinner Night Awards 2026 — An Evening of Excellence & Glamour.",
+  },
 };
 
 export default function RootLayout({

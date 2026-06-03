@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { ticketTiers } from "@/lib/data"
+import { RefreshButton } from "@/components/admin-refresh-button"
 
 function formatNaira(kobo: number) {
   return `₦${(kobo / 100).toLocaleString("en-NG")}`
@@ -44,7 +45,8 @@ export default async function AdminTicketsPage({
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <RefreshButton />
           {[undefined, "paid", "pending", "failed"].map((s) => (
             <a
               key={s ?? "all"}

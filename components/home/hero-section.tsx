@@ -5,6 +5,7 @@ import {
   Calendar01Icon,
   Location01Icon,
   Ticket01Icon,
+  ArrowDown01Icon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 
@@ -100,6 +101,19 @@ export function HeroSection() {
             </Link>
           </Button>
         </div>
+      </div>
+
+      {/* scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 animate-bounce">
+        <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/30">
+          Scroll
+        </span>
+        <HugeiconsIcon
+          icon={ArrowDown01Icon}
+          size={18}
+          color="currentColor"
+          className="text-primary/60"
+        />
       </div>
     </section>
   );
