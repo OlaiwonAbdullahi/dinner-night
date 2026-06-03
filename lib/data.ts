@@ -23,6 +23,7 @@ export type TicketTier = {
   cta: string;
   highlighted: boolean;
   badge?: string;
+    isSponsor?: boolean  
 };
 
 export const votingCategories: VotingCategory[] = [
@@ -227,11 +228,36 @@ export const ticketTiers: TicketTier[] = [
       "3-course plated dinner",
       "Welcome champagne",
       "Red carpet access & photography",
-
       "Meet & greet opportunity",
     ],
     cta: "Get Volunteer Ticket",
     highlighted: true,
     badge: "Most Popular",
   },
+  {
+    id: "sponsor",
+    name: "Sponsor",
+    price: "Custom",
+    description:
+      "Support the event with any amount you choose. Every contribution helps make this event possible.",
+    features: [
+      "Special mention in event program",
+      "Sponsor badge & recognition",
+      "Our deepest gratitude",
+      "Certificate of sponsorship",
+    ],
+    cta: "Become a Sponsor",
+    highlighted: false,
+    badge: "Open Amount",
+    isSponsor: true,
+  },
+];
+
+// Preset sponsor amounts in kobo (Paystack uses kobo)
+export const sponsorPresets = [
+  { label: "₦5,000",   kobo: 500000 },
+  { label: "₦10,000",  kobo: 1000000 },
+  { label: "₦20,000",  kobo: 2000000 },
+  { label: "₦50,000",  kobo: 5000000 },
+  { label: "₦100,000", kobo: 10000000 },
 ];

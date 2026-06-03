@@ -3,19 +3,29 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Ticket01Icon,
   CrownIcon,
+  HeartIcon,
   CheckmarkCircle01Icon,
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons"
-import { Button } from "@/components/ui/button"
 import { ticketTiers } from "@/lib/data"
 import { SectionHeader } from "@/components/home/section-header"
 import { AnimateIn } from "@/components/animate-in"
+import { TicketCheckoutButton } from "@/components/ticket-checkout-button"
+import { SponsorCheckoutButton } from "@/components/sponsor-checkout-button"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { IconSvgElement } from "@hugeicons/react"
 
 const ticketIconMap: Record<string, IconSvgElement> = {
   regular: Ticket01Icon,
   volunteer: CrownIcon,
+  sponsor: HeartIcon,
+}
+
+// kobo prices for non-sponsor tiers
+const ticketPriceMap: Record<string, number> = {
+  regular: 500000,   // ₦5,000
+  volunteer: 1000000, // ₦10,000
 }
 
 export function TicketsPreview() {
@@ -30,7 +40,7 @@ export function TicketsPreview() {
           sub="Choose the experience that best suits you"
         />
 
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 max-w-2xl mx-auto">
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
           {previewTiers.map((tier, i) => {
             const TierIcon = ticketIconMap[tier.id] ?? Ticket01Icon
             return (
@@ -51,36 +61,52 @@ export function TicketsPreview() {
 
                   <div className="mb-4 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                      <HugeiconsIcon icon={TierIcon} size={18} color="currentColor" className="text-primary" />
+                      <HugeiconsIcon
+                        icon={TierIcon}
+                        size={18}
+                        color="currentColor"
+                        className="text-primary"
+                      />
                     </div>
                     <h3 className="font-bold text-white">{tier.name}</h3>
                   </div>
 
                   <div className="mb-1">
-                    <span className="text-3xl font-extrabold text-primary">{tier.price}</span>
+                    <span className="text-3xl font-extrabold text-primary">
+                      {tier.price}
+                    </span>
                   </div>
-                  <p className="mb-5 text-xs text-white/35 leading-relaxed">{tier.description}</p>
+                  <p className="mb-5 text-xs text-white/35 leading-relaxed">
+                    {tier.description}
+                  </p>
 
                   <ul className="mb-6 flex-1 space-y-2">
                     {tier.features.slice(0, 4).map((f) => (
                       <li key={f} className="flex items-start gap-2 text-xs text-white/50">
-                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={13} color="currentColor" className="text-primary mt-0.5 shrink-0" />
+                        <HugeiconsIcon
+                          icon={CheckmarkCircle01Icon}
+                          size={13}
+                          color="currentColor"
+                          className="text-primary mt-0.5 shrink-0"
+                        />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  <Button
-                    asChild
-                    size="sm"
-                    className={
-                      tier.highlighted
-                        ? "bg-primary text-black hover:bg-primary/80 font-bold tracking-wide"
-                        : "border border-primary/30 bg-transparent text-primary hover:bg-primary/10"
-                    }
-                  >
-                    <Link href="/tickets">{tier.cta}</Link>
-                  </Button>
+                  {/* Sponsor tier → custom amount picker */}
+                  {tier.isSponsor ? (
+                    <SponsorCheckoutButton ctaLabel={tier.cta} />
+                  ) : (
+                    <TicketCheckoutButton
+                      tierId={tier.id}
+                      tierName={tier.name}
+                      priceLabel={tier.price}
+                      priceKobo={ticketPriceMap[tier.id] ?? 0}
+                      ctaLabel={tier.cta}
+                      highlighted={tier.highlighted}
+                    />
+                  )}
                 </div>
               </AnimateIn>
             )
