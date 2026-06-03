@@ -21,6 +21,8 @@ export async function GET() {
     })
   } catch (err) {
     console.error("[votes/results]", err)
-    return NextResponse.json({}, { status: 500 })
+    return NextResponse.json({}, {
+      headers: { "Cache-Control": "no-store" },
+    })
   }
 }

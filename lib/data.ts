@@ -150,6 +150,7 @@ export const votingCategories: VotingCategory[] = [
       { id: "mb-1", name: "Taiwo Priscilla", tagline: "", initial: "T" },
       { id: "mb-2", name: "Kegbeyale Rebecca", tagline: "", initial: "K" },
       { id: "mb-3", name: "Ganiyu Fatimah", tagline: "", initial: "G" },
+      { id: "mb-4", name: "Olujobi Adesewa", tagline: "", initial: "O" },
     ],
   },
   {

@@ -5,8 +5,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle01Icon, ThumbsUpIcon } from "@hugeicons/core-free-icons"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { slugify } from "@/lib/utils"
 import type { VotingCategory } from "@/lib/data"
 
 function avatarUrl(name: string) {
@@ -33,7 +33,13 @@ function toPercentages(
   return result
 }
 
-export function VotingSection({ category }: { category: VotingCategory }) {
+export function VotingSection({
+  category,
+  highlightContestantId,
+}: {
+  category: VotingCategory
+  highlightContestantId?: string | null
+}) {
   const [voteTotals, setVoteTotals] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
 
@@ -61,17 +67,22 @@ export function VotingSection({ category }: { category: VotingCategory }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {category.contestants.map((contestant) => {
           const isLeader = leaderId === contestant.id && hasVotes
+          const isHighlighted = highlightContestantId === contestant.id
           const pct = percentages[contestant.id] ?? 0
           const voteCount = voteTotals[contestant.id] ?? 0
+          const nomineeHref = `/voting/${category.id}/${slugify(contestant.name)}`
 
           return (
-            <div
+            <Link
               key={contestant.id}
+              href={nomineeHref}
               className={cn(
                 "relative flex flex-col items-center rounded-2xl border p-6 transition-all duration-300",
                 isLeader
                   ? "border-primary/60 bg-primary/5 shadow-[0_0_24px_oklch(0.745_0.14_86/0.12)]"
-                  : "border-white/10 bg-card"
+                  : isHighlighted
+                    ? "border-primary/40 bg-primary/5 ring-1 ring-primary/20"
+                    : "border-white/10 bg-card"
               )}
             >
               {isLeader && (
@@ -122,18 +133,12 @@ export function VotingSection({ category }: { category: VotingCategory }) {
                   </div>
                 </div>
               ) : (
-                <Button
-                  size="sm"
-                  className="w-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary hover:text-black font-semibold transition-all"
-                  asChild
-                >
-                  <Link href="/voting">
-                    <HugeiconsIcon icon={ThumbsUpIcon} size={14} color="currentColor" />
-                    Vote
-                  </Link>
-                </Button>
+                <span className="flex w-full items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary hover:text-black">
+                  <HugeiconsIcon icon={ThumbsUpIcon} size={14} color="currentColor" />
+                  Vote
+                </span>
               )}
-            </div>
+            </Link>
           )
         })}
       </div>

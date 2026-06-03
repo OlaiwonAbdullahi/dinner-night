@@ -1,5 +1,20 @@
 const BASE = "https://api.paystack.co"
 
+async function fetchWithRetry(url: string, init: RequestInit, retries = 2) {
+  let lastError: unknown
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, init)
+    } catch (error) {
+      lastError = error
+      const code = (error as { cause?: { code?: string } })?.cause?.code
+      const isTransient = code === "UND_ERR_CONNECT_TIMEOUT" || code === "UND_ERR_CONNECT"
+      if (!isTransient || attempt === retries) throw error
+    }
+  }
+  throw lastError
+}
+
 function headers() {
   return {
     Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
@@ -28,7 +43,7 @@ export async function initializeTransaction(params: {
   metadata?: Record<string, unknown>
   callback_url?: string
 }): Promise<PaystackInitResult> {
-  const res = await fetch(`${BASE}/transaction/initialize`, {
+  const res = await fetchWithRetry(`${BASE}/transaction/initialize`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify(params),

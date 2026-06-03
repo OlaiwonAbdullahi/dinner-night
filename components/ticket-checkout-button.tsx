@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Script from "next/script"
 import { useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle01Icon } from "@hugeicons/core-free-icons"
@@ -147,27 +148,30 @@ export function TicketCheckoutButton({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className={
-            highlighted
-              ? "w-full bg-primary text-black hover:bg-primary/80 font-bold tracking-wide"
-              : "w-full border border-primary/30 bg-transparent text-primary hover:bg-primary/10"
-          }
-        >
-          {ctaLabel}
-        </Button>
-      </DialogTrigger>
+    <>
+      <Script src="https://js.paystack.co/v1/inline.js" strategy="afterInteractive" />
 
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-primary/60 uppercase">
-            {tierName} Ticket
-          </div>
-          <DialogTitle>Complete Your Purchase</DialogTitle>
-        </DialogHeader>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogTrigger asChild>
+          <Button
+            size="sm"
+            className={
+              highlighted
+                ? "w-full bg-primary text-black hover:bg-primary/80 font-bold tracking-wide"
+                : "w-full border border-primary/30 bg-transparent text-primary hover:bg-primary/10"
+            }
+          >
+            {ctaLabel}
+          </Button>
+        </DialogTrigger>
+
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-primary/60 uppercase">
+              {tierName} Ticket
+            </div>
+            <DialogTitle>Complete Your Purchase</DialogTitle>
+          </DialogHeader>
 
         <div className="mb-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/3 px-4 py-3">
           <span className="text-sm text-white/60">{tierName}</span>
@@ -207,7 +211,8 @@ export function TicketCheckoutButton({
             onSubmit={handleCheckoutSubmit}
           />
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
