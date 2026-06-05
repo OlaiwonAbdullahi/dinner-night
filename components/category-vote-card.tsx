@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Link from "next/link"
 import Image from "next/image"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -23,6 +24,7 @@ import type { VotingCategory } from "@/lib/data"
 
 const PRICE_PER_VOTE = 50
 const MIN_VOTES = 2
+const MAX_VOTES = 999999
 
 type Step = "select" | "checkout" | "paying"
 
@@ -173,7 +175,7 @@ export function CategoryVoteCard({ category, index, autoOpen }: Props) {
 
           <div className="flex items-center justify-between border-t border-white/5 px-4 py-3">
             <span className="text-[10px] font-bold tracking-widest text-primary/50 uppercase">
-              ₦{PRICE_PER_VOTE.toLocaleString()}/vote · min ₦{(PRICE_PER_VOTE * MIN_VOTES).toLocaleString()}
+              ₦{PRICE_PER_VOTE.toLocaleString()}/vote
             </span>
             <span className="flex items-center gap-1 text-[11px] font-semibold text-primary/60 group-hover:text-primary transition-colors">
               <HugeiconsIcon icon={ThumbsUpIcon} size={12} color="currentColor" />
@@ -282,22 +284,47 @@ export function CategoryVoteCard({ category, index, autoOpen }: Props) {
 
                 <div className="mb-4 h-px bg-white/5" />
 
-                <div className="mb-5 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-white/50">Quantity</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(MIN_VOTES, q - 1))}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/50 hover:border-primary/40 hover:text-primary transition-all"
-                    >
-                      <HugeiconsIcon icon={MinusSignIcon} size={14} color="currentColor" />
-                    </button>
-                    <span className="w-6 text-center text-sm font-extrabold text-white">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity((q) => Math.min(99, q + 1))}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/50 hover:border-primary/40 hover:text-primary transition-all"
-                    >
-                      <HugeiconsIcon icon={PlusSignIcon} size={14} color="currentColor" />
-                    </button>
+                <div className="mb-5 flex items-end justify-between gap-4">
+                  <div className="flex-1">
+                    <span className="mb-2 block text-sm font-semibold text-white/50">Quantity</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.max(MIN_VOTES, q - 1))}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/50 transition-all hover:border-primary/40 hover:text-primary"
+                        aria-label="Decrease vote quantity"
+                      >
+                        <HugeiconsIcon icon={MinusSignIcon} size={14} color="currentColor" />
+                      </button>
+
+                      <input
+                        type="number"
+                        min={MIN_VOTES}
+                        max={MAX_VOTES}
+                        step={1}
+                        inputMode="numeric"
+                        value={quantity}
+                        onChange={(e) => {
+                          const next = Number.parseInt(e.target.value, 10)
+                          if (Number.isNaN(next)) {
+                            setQuantity(MIN_VOTES)
+                            return
+                          }
+                          setQuantity(Math.max(MIN_VOTES, Math.min(MAX_VOTES, next)))
+                        }}
+                        className="h-10 w-24 rounded-lg border border-white/10 bg-white/5 text-center text-sm font-extrabold text-white outline-none transition-colors focus:border-primary/50"
+                        aria-label="Vote quantity"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.min(MAX_VOTES, q + 1))}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/50 transition-all hover:border-primary/40 hover:text-primary"
+                        aria-label="Increase vote quantity"
+                      >
+                        <HugeiconsIcon icon={PlusSignIcon} size={14} color="currentColor" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 

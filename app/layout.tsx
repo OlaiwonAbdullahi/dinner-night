@@ -4,22 +4,33 @@ import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
+const figtree = Figtree({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+  preload: false,
+});
 
 const unbounded = Unbounded({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "700", "900"],
+  display: "swap",
+  preload: false,
 });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -51,11 +62,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable, unbounded.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        figtree.variable,
+        unbounded.variable
+      )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         {children}
-        <Script src="https://js.paystack.co/v1/inline.js" strategy="afterInteractive" />
+        <Script
+          src="https://js.paystack.co/v1/inline.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
