@@ -76,7 +76,7 @@ export const votingCategories: VotingCategory[] = [
   },
   {
     id: "cruise-commander",
-    name: "Cruise Commander of the Year",
+    name: "Most Vibrant Personality Award", 
     description:
       "Recognising the life of the party who kept everyone entertained",
     icon: "headphones",

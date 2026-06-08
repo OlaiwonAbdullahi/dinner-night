@@ -28,8 +28,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { tierId, quantity, amount, email, name, phone, reference } = await req.json()
-
+const { tierId, quantity, amount, email, name, phone, department, reference } = await req.json()
     if (!tierId || !email || !name || !reference) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
@@ -49,6 +48,7 @@ export async function POST(req: NextRequest) {
         email,
         name,
         phone: phone ?? "",
+        department: department ?? null,  
         reference,
         status: "paid",
       },

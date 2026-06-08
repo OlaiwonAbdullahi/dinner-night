@@ -115,6 +115,10 @@ export default async function TicketReceiptPage({
                   label="Amount Paid"
                   value={`₦${(ticket.amount / 100).toLocaleString()}`}
                 />
+                {ticket.department && (
+  <Detail label="Department" value={ticket.department} />
+)} 
+                
               </div>
 
               {/* Right: QR + ticket no */}

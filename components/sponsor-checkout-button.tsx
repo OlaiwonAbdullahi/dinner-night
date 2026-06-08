@@ -117,6 +117,7 @@ export function SponsorCheckoutButton({ ctaLabel }: Props) {
           setOpen(true)
           return
         }
+        // define callback as inline async to avoid lint "access before declared"
         window.PaystackPop.setup({
           key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
           email,
@@ -127,7 +128,39 @@ export function SponsorCheckoutButton({ ctaLabel }: Props) {
             setOpen(true)
           },
           callback: (response) => {
-            void handlePaymentSuccess(response.reference)
+            void (async () => {
+              const reference = response.reference
+              try {
+                const res = await fetch("/api/tickets", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    tierId: "sponsor",
+                    quantity: 1,
+                    amount: resolvedKobo!,
+                    email: checkoutValues.email,
+                    name: checkoutValues.name,
+                    phone: checkoutValues.phone,
+                    department: checkoutValues!.department,   // ← ADD
+                    reference,
+                  }),
+                })
+
+                if (!res.ok) {
+                  const d = await res.json()
+                  throw new Error(d.error ?? "Failed to record sponsorship")
+                }
+
+                setStep("success")
+                setTimeout(() => router.push(`/tickets/receipt/${reference}`), 1200)
+              } catch {
+                setErrorMsg(
+                  "Payment received but sponsorship recording failed. Please contact support.",
+                )
+                setStep("checkout")
+                setOpen(true)
+              }
+            })()
           },
         }).openIframe()
       }, 350)
