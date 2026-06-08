@@ -81,9 +81,40 @@ export function TicketCheckoutButton({
             setStep("checkout")
             setOpen(true)
           },
+          // define callback as inline async to avoid lint "access before declared"
           callback: (response) => {
             void (async () => {
-              await handlePaymentSuccess(response.reference)
+              const reference = response.reference
+              try {
+                const res = await fetch("/api/tickets", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    tierId,
+                    quantity: 1,
+                    amount: priceKobo,
+                    email: checkoutValues!.email,
+                    name: checkoutValues!.name,
+                    phone: checkoutValues!.phone,
+                    department: checkoutValues!.department,  
+                    reference,
+                  }),
+                })
+
+                if (!res.ok) {
+                  const d = await res.json()
+                  throw new Error(d.error ?? "Failed to record ticket")
+                }
+
+                setStep("success")
+                setTimeout(() => router.push(`/tickets/receipt/${reference}`), 2500)
+              } catch {
+                setErrorMsg(
+                  "Payment received but ticket recording failed. Please contact support.",
+                )
+                setStep("checkout")
+                setOpen(true)
+              }
             })()
           },
         }).openIframe()
@@ -131,6 +162,7 @@ export function TicketCheckoutButton({
           email: checkoutValues!.email,
           name: checkoutValues!.name,
           phone: checkoutValues!.phone,
+          department: checkoutValues!.department,
           reference,
         }),
       })

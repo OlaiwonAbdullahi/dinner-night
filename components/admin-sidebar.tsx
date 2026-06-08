@@ -11,6 +11,7 @@ import {
   Menu01Icon,
   Cancel01Icon,
   CheckmarkBadge01Icon,
+  Building04Icon,
 } from "@hugeicons/core-free-icons"
 import { AdminLogoutButton } from "@/components/admin-logout-button"
 import { cn } from "@/lib/utils"
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin/votes", label: "Votes", icon: ThumbsUpIcon },
   { href: "/admin/tickets", label: "Tickets", icon: Ticket01Icon },
   { href: "/admin/bulk-verify", label: "Bulk Verify", icon: CheckmarkBadge01Icon },
+    { href: "/admin/department-tickets", label: "Department Tickets",  icon: Building04Icon }, 
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
