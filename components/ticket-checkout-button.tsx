@@ -82,7 +82,9 @@ export function TicketCheckoutButton({
             setOpen(true)
           },
           callback: (response) => {
-            void handlePaymentSuccess(response.reference)
+            void (async () => {
+              await handlePaymentSuccess(response.reference)
+            })()
           },
         }).openIframe()
       }, 350)
@@ -117,7 +119,7 @@ export function TicketCheckoutButton({
     }
   }
 
-  async function handlePaymentSuccess(reference: string) {
+  const handlePaymentSuccess = async (reference: string) => {
     try {
       const res = await fetch("/api/tickets", {
         method: "POST",
@@ -136,9 +138,12 @@ export function TicketCheckoutButton({
         const d = await res.json()
         throw new Error(d.error ?? "Failed to record ticket")
       }
+
+      // Ticket recorded, but receipt page requires `ticket.status === "paid"`.
+      // To ensure the DB update is visible before navigation, add a slightly
+      // longer delay (and avoid showing a broken/Not Found receipt).
       setStep("success")
-      // Redirect to receipt after short delay
-      setTimeout(() => router.push(`/tickets/receipt/${reference}`), 1200)
+      setTimeout(() => router.push(`/tickets/receipt/${reference}`), 2500)
     } catch {
       setErrorMsg("Payment received but ticket recording failed. Please contact support.")
       setStep("checkout")
