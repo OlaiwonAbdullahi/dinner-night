@@ -21,7 +21,7 @@ const navItems = [
   { href: "/admin/votes", label: "Votes", icon: ThumbsUpIcon },
   { href: "/admin/tickets", label: "Tickets", icon: Ticket01Icon },
   { href: "/admin/bulk-verify", label: "Bulk Verify", icon: CheckmarkBadge01Icon },
-    { href: "/admin/department-tickets", label: "Department Tickets",  icon: Building04Icon }, 
+    // { href: "/admin/department-ticket", label: "Department Tickets",  icon: Building04Icon }, 
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
