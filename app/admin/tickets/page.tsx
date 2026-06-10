@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { ticketTiers } from "@/lib/data"
 import { RefreshButton } from "@/components/admin-refresh-button"
 
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 function formatNaira(kobo: number) {
   return `₦${(kobo / 100).toLocaleString("en-NG")}`
 }
@@ -16,15 +19,21 @@ const STATUS_STYLES: Record<string, string> = {
   failed: "bg-red-500/15 text-red-400 border-red-500/20",
 }
 
-export default async function AdminTicketsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>
+// Completely optional/loose structure to stop the compiler from strict-checking searchParams structures at build time
+export default async function AdminTicketsPage(props: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const { status } = await searchParams
+  // Await safely with a fallback empty object
+  const resolvedParams = (await props.searchParams) || {}
+  
+  const status = typeof resolvedParams.status === "string" ? resolvedParams.status : undefined
+  const department = typeof resolvedParams.department === "string" ? resolvedParams.department : undefined
 
   const tickets = await prisma.ticket.findMany({
-    where: status ? { status } : {},
+    where: {
+      ...(status ? { status } : {}),
+      ...(department === "set" ? { department: { not: null } } : {}),
+    },
     orderBy: { createdAt: "desc" },
     take: 200,
   })
@@ -45,17 +54,65 @@ export default async function AdminTicketsPage({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <RefreshButton />
-          {[undefined, "paid", "pending", "failed"].map((s) => (
-            <a
-              key={s ?? "all"}
-              href={s ? `/admin/tickets?status=${s}` : "/admin/tickets"}
-              className={`rounded-lg border px-3 py-1.5 text-xs capitalize transition-all ${status === s || (!status && !s) ? "border-primary/50 bg-primary/10 text-primary" : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"}`}
-            >
-              {s ?? "All"}
-            </a>
-          ))}
+
+          {/* Status filters */}
+          <a 
+            href="/admin/tickets"
+            className={`rounded-lg border px-3 py-1.5 text-xs capitalize transition-all ${
+              !status && !department
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"
+            }`}
+          >
+            All
+          </a>
+
+          <a
+            href="/admin/tickets?status=paid"
+            className={`rounded-lg border px-3 py-1.5 text-xs capitalize transition-all ${
+              status === "paid"
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"
+            }`}
+          >
+            Paid
+          </a>
+          
+          <a 
+            href="/admin/tickets?status=pending"
+            className={`rounded-lg border px-3 py-1.5 text-xs capitalize transition-all ${
+              status === "pending"
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"
+            }`}
+          >
+            Pending
+          </a>
+          
+          <a 
+            href="/admin/tickets?status=failed"
+            className={`rounded-lg border px-3 py-1.5 text-xs capitalize transition-all ${
+              status === "failed"
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"
+            }`}
+          >
+            Failed
+          </a>
+
+          {/* Department filter */}
+          <a 
+            href={department === "set" ? "/admin/tickets" : "/admin/tickets?department=set"}
+            className={`rounded-lg border px-3 py-1.5 text-xs transition-all ${
+              department === "set"
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-white/10 text-white/50 hover:border-primary/30 hover:text-primary"
+            }`}
+          >
+            Has Department
+          </a>
         </div>
       </div>
 
@@ -63,7 +120,7 @@ export default async function AdminTicketsPage({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/5 bg-card/50">
-              {["Name", "Email", "Phone", "Tier", "Amount", "Reference", "Status", "Date"].map((h) => (
+              {["Name", "Email", "Department", "Phone", "Tier", "Amount", "Reference", "Status", "Date"].map((h) => (
                 <th key={h} className="px-4 py-3 text-left text-[10px] font-bold tracking-widest text-white/30 uppercase">
                   {h}
                 </th>
@@ -73,7 +130,7 @@ export default async function AdminTicketsPage({
           <tbody>
             {tickets.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-sm text-white/30">
+                <td colSpan={9} className="px-4 py-8 text-center text-sm text-white/30">
                   No tickets found.
                 </td>
               </tr>
@@ -84,6 +141,15 @@ export default async function AdminTicketsPage({
                   <tr key={ticket.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
                     <td className="px-4 py-3 font-medium text-white">{ticket.name}</td>
                     <td className="px-4 py-3 text-white/50">{ticket.email}</td>
+                    <td className="px-4 py-3">
+                      {ticket.department ? (
+                        <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                          {ticket.department}
+                        </span>
+                      ) : (
+                        <span className="text-white/20">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-white/50">{ticket.phone}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${tier?.highlighted ? "border-primary/40 bg-primary/10 text-primary" : "border-white/10 text-white/40"}`}>
