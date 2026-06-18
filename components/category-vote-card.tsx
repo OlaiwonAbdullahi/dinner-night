@@ -36,9 +36,11 @@ type Props = {
   category: VotingCategory
   index: number
   autoOpen?: boolean
+  votingClosed?: boolean   
+
 }
 
-export function CategoryVoteCard({ category, index, autoOpen }: Props) {
+export function CategoryVoteCard({ category, index, autoOpen, votingClosed}: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>("select")
   const [selected, setSelected] = useState<string | null>(null)
@@ -49,12 +51,12 @@ export function CategoryVoteCard({ category, index, autoOpen }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
 
   // Auto-open when visited via a shared link
-  useEffect(() => {
-    if (!autoOpen) return
+   useEffect(() => {
+    if (!autoOpen || votingClosed) return
     cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
     const t = setTimeout(() => setOpen(true), 450)
     return () => clearTimeout(t)
-  }, [autoOpen])
+  }, [autoOpen, votingClosed])
 
   const total = quantity * PRICE_PER_VOTE
   const totalKobo = total * 100
@@ -137,8 +139,16 @@ export function CategoryVoteCard({ category, index, autoOpen }: Props) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {/* ── Card ── */}
-      <DialogTrigger asChild>
-        <div ref={cardRef} className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_oklch(0.745_0.14_86/0.08)]">
+      <DialogTrigger asChild disabled={votingClosed}>
+          <div
+            ref={cardRef}
+            className={cn(
+              "group relative overflow-hidden rounded-2xl border border-white/8 bg-card transition-all duration-300",
+              votingClosed
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer hover:border-primary/50 hover:shadow-[0_0_30px_oklch(0.745_0.14_86/0.08)]"
+            )}
+          >
           <div className="relative h-44 w-full overflow-hidden">
             <Image
               src={category.image}
@@ -177,10 +187,16 @@ export function CategoryVoteCard({ category, index, autoOpen }: Props) {
             <span className="text-[10px] font-bold tracking-widest text-primary/50 uppercase">
               ₦{PRICE_PER_VOTE.toLocaleString()}/vote
             </span>
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-primary/60 group-hover:text-primary transition-colors">
-              <HugeiconsIcon icon={ThumbsUpIcon} size={12} color="currentColor" />
-              Vote
-            </span>
+            {votingClosed ? (
+              <span className="text-[11px] font-semibold text-red-400/70 uppercase tracking-wide">
+                Closed
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-primary/60 group-hover:text-primary transition-colors">
+                <HugeiconsIcon icon={ThumbsUpIcon} size={12} color="currentColor" />
+                Vote
+              </span>
+            )}
           </div>
         </div>
       </DialogTrigger>
