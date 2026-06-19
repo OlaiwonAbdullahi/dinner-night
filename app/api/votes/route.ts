@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { verifyTransaction } from "@/lib/paystack"
+import { isVotingClosed } from "@/lib/data"   
 
 export async function GET(req: NextRequest) {
   const reference = new URL(req.url).searchParams.get("reference")
@@ -56,6 +57,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (isVotingClosed()) {                                          // ← ADD
+      return NextResponse.json({ error: "Voting has closed" }, { status: 403 })  // ← ADD
+    }  
     const { categoryId, contestantId, quantity, amount, email, name, phone, reference } =
       await req.json()
 

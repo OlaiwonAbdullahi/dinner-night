@@ -26,6 +26,15 @@ export type TicketTier = {
   isSponsor?: boolean;
 };
 
+//Voting closes Monday, June 22, 2026 at 12:00 AM WAT (UTC+1)
+// = June 21, 2026 23:00 UTC
+
+export const VOTING_DEADLINE = new Date("2026-06-20T22:59:00.000Z");
+
+export function isVotingClosed(): boolean {
+  return Date.now() >= VOTING_DEADLINE.getTime();
+}
+
 export const votingCategories: VotingCategory[] = [
   {
     id: "tech-rising-star",

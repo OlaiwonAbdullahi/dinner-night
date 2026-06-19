@@ -4,7 +4,8 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { CategoryVoteCard } from "@/components/category-vote-card";
 import { AnimateIn } from "@/components/animate-in";
-import { votingCategories } from "@/lib/data";
+import { VotingCountdown } from "@/components/voting-countdown";
+import { votingCategories, isVotingClosed } from "@/lib/data";
 
 export const metadata = {
   title: "Vote — Dinner Night Awards 2026",
@@ -17,6 +18,8 @@ export default async function VotingPage({
   searchParams: Promise<{ category?: string }>
 }) {
   const { category: openCategory } = await searchParams
+  const closed = isVotingClosed()
+
   return (
     <div className="flex min-h-full flex-col bg-black text-white">
       <Navbar />
@@ -31,10 +34,7 @@ export default async function VotingPage({
           }}
         />
         <div className="relative mx-auto max-w-6xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-primary uppercase">
-            <HugeiconsIcon icon={FireIcon} size={12} color="currentColor" />
-            Voting is now open
-          </div>
+          <VotingCountdown />
           <h1
             className="text-[clamp(2.5rem,8vw,5rem)] font-extrabold tracking-tighter text-white"
             style={{
@@ -44,8 +44,9 @@ export default async function VotingPage({
             Cast Your <span className="text-primary">Vote</span>
           </h1>
           <p className="mt-4 text-sm text-white/40 max-w-md mx-auto leading-relaxed">
-            Click any category below, choose your favourite nominee, and cast
-            your vote. ₦50 per vote · minimum ₦100.
+            {closed
+              ? "Voting has ended. Thank you to everyone who participated!"
+              : "Click any category below, choose your favourite nominee, and cast your vote. ₦50 per vote · minimum ₦100."}
           </p>
         </div>
       </section>
@@ -60,6 +61,7 @@ export default async function VotingPage({
                   category={cat}
                   index={idx}
                   autoOpen={openCategory === cat.id}
+                  votingClosed={closed}
                 />
               </AnimateIn>
             ))}
