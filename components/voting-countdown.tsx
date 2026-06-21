@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { VOTING_DEADLINE } from "@/lib/data"
+import { VOTING_DEADLINE, VOTING_MANUALLY_CLOSED } from "@/lib/data"
 
 function getTimeLeft() {
+  if (VOTING_MANUALLY_CLOSED) return null
   const diff = VOTING_DEADLINE.getTime() - Date.now()
   if (diff <= 0) return null
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))

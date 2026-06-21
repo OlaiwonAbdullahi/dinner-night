@@ -70,6 +70,7 @@ export function CategoryVoteCard({ category, index, autoOpen, votingClosed}: Pro
   }
 
   function handleOpenChange(v: boolean) {
+    if (v && votingClosed) return
     setOpen(v)
     if (!v && step !== "paying") resetDialog()
   }
@@ -142,10 +143,11 @@ export function CategoryVoteCard({ category, index, autoOpen, votingClosed}: Pro
       <DialogTrigger asChild disabled={votingClosed}>
           <div
             ref={cardRef}
+            aria-disabled={votingClosed}
             className={cn(
               "group relative overflow-hidden rounded-2xl border border-white/8 bg-card transition-all duration-300",
               votingClosed
-                ? "opacity-50 cursor-not-allowed"
+                ? "opacity-50 cursor-not-allowed pointer-events-none"
                 : "cursor-pointer hover:border-primary/50 hover:shadow-[0_0_30px_oklch(0.745_0.14_86/0.08)]"
             )}
           >
