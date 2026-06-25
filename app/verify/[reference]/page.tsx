@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ticketTiers } from "@/lib/data";
+import { verifyTransaction } from "@/lib/paystack";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   CheckmarkCircle01Icon,
@@ -10,8 +11,49 @@ import {
   UserIcon,
 } from "@hugeicons/core-free-icons";
 import { VerifyTicketForm } from "@/components/verify-ticket-form";
+import { PrintTicketButton } from "@/components/print-ticket-button";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+async function getOrRecoverTicket(reference: string) {
+  // 1. Check DB first
+  const existing = await prisma.ticket.findUnique({ where: { reference } })
+  if (existing) return existing
+
+  // 2. Not in DB — try Paystack
+  try {
+    const tx = await verifyTransaction(reference)
+    if (tx.status !== "success") return null
+
+    const meta = tx.metadata as {
+      tierId?: string
+      name?: string
+      phone?: string
+    } | null
+
+    if (!meta?.tierId) return null
+
+    // Record it now
+    const ticket = await prisma.ticket.upsert({
+      where: { reference },
+      update: { status: "paid" },
+      create: {
+        reference,
+        status: "paid",
+        tierId: meta.tierId,
+        quantity: 1,
+        amount: tx.amount,
+        email: tx.customer.email,
+        name: meta.name ?? tx.customer.email,
+        phone: meta.phone ?? "",
+      },
+    })
+    return ticket
+  } catch {
+    return null
+  }
+}
 
 export default async function VerifyPage({
   params,
@@ -20,104 +62,142 @@ export default async function VerifyPage({
 }) {
   const { reference } = await params;
 
-  const ticket = await prisma.ticket.findUnique({ where: { reference } });
+  const ticket = await getOrRecoverTicket(reference)
   const tier = ticket ? ticketTiers.find((t) => t.id === ticket.tierId) : null;
   const isValid = !!ticket && ticket.status === "paid";
 
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    "https://dinner.eventsnest.xyz";
+  const receiptUrl = `/tickets/receipt/${reference}`;
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-4 py-12">
-      <div className="w-full max-w-sm">
-        <VerifyTicketForm />
+    <>
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          body { background: #000 !important; }
+        }
+      `}</style>
 
-        {/* Status banner */}
-        <div
-          className={`mb-6 flex flex-col items-center gap-3 rounded-3xl p-8 text-center border ${
-            isValid
-              ? "border-green-500/30 bg-green-500/10"
-              : "border-red-500/30 bg-red-500/10"
-          }`}
-        >
+      <div className="flex min-h-screen items-center justify-center bg-black px-4 py-12">
+        <div className="w-full max-w-sm">
+
+          {/* Search form — hidden on print */}
+          <div className="no-print">
+            <VerifyTicketForm />
+          </div>
+
+          {/* Status banner */}
           <div
-            className={`flex h-20 w-20 items-center justify-center rounded-full ${
-              isValid ? "bg-green-500/20" : "bg-red-500/20"
+            className={`mb-6 flex flex-col items-center gap-3 rounded-3xl p-8 text-center border ${
+              isValid
+                ? "border-green-500/30 bg-green-500/10"
+                : "border-red-500/30 bg-red-500/10"
             }`}
           >
-            <HugeiconsIcon
-              icon={isValid ? CheckmarkCircle01Icon : CancelCircleIcon}
-              size={44}
-              color="currentColor"
-              className={isValid ? "text-green-400" : "text-red-400"}
-            />
-          </div>
-          <div>
-            <p
-              className={`text-2xl font-extrabold tracking-tight ${
-                isValid ? "text-green-400" : "text-red-400"
+            <div
+              className={`flex h-20 w-20 items-center justify-center rounded-full ${
+                isValid ? "bg-green-500/20" : "bg-red-500/20"
               }`}
             >
-              {isValid ? "VALID TICKET" : "INVALID TICKET"}
-            </p>
-            <p className="mt-1 text-sm text-white/40">
-              {isValid
-                ? "Admit this attendee"
-                : ticket
-                  ? "Payment not completed"
-                  : "Ticket not found"}
-            </p>
-          </div>
-        </div>
-
-        {/* Ticket details — only show if valid */}
-        {isValid && ticket && (
-          <div className="rounded-2xl border border-white/8 bg-[#0d0d0d] overflow-hidden">
-            {/* Gold header */}
-            <div className="bg-primary px-5 py-3 flex items-center justify-between">
-              <span
-                className="text-xs font-extrabold tracking-widest text-black"
-                style={{ fontFamily: "var(--font-display)" }}
+              <HugeiconsIcon
+                icon={isValid ? CheckmarkCircle01Icon : CancelCircleIcon}
+                size={44}
+                color="currentColor"
+                className={isValid ? "text-green-400" : "text-red-400"}
+              />
+            </div>
+            <div>
+              <p
+                className={`text-2xl font-extrabold tracking-tight ${
+                  isValid ? "text-green-400" : "text-red-400"
+                }`}
               >
-                CSC&apos;29
-              </span>
-              <span className="rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
-                {tier?.name ?? ticket.tierId}
-              </span>
-            </div>
-
-            {/* Details */}
-            <div className="divide-y divide-white/5 px-5 py-2">
-              <Row icon={UserIcon} label="Attendee" value={ticket.name} />
-              <Row
-                icon={Ticket01Icon}
-                label="Ticket Type"
-                value={tier?.name ?? ticket.tierId}
-                highlight
-              />
-              <Row icon={Calendar01Icon} label="Date" value="June 18, 2026" />
-              <Row
-                icon={Location01Icon}
-                label="Venue"
-                value="Antimaggies event center, Yoaco Ogbomosho"
-              />
-            </div>
-
-            {/* Reference */}
-            <div className="border-t border-white/5 px-5 py-3 flex items-center justify-between">
-              <span className="text-[10px] text-white/25 uppercase tracking-widest">
-                Ref
-              </span>
-              <span className="font-mono text-xs text-white/30">
-                {reference}
-              </span>
+                {isValid ? "VALID TICKET" : "INVALID TICKET"}
+              </p>
+              <p className="mt-1 text-sm text-white/40">
+                {isValid
+                  ? "Payment confirmed"
+                  : ticket
+                    ? "Payment not completed"
+                    : "Ticket not found — enter your reference above"}
+              </p>
             </div>
           </div>
-        )}
 
-        {/* Branding */}
-        <p className="mt-6 text-center text-[10px] text-white/20 tracking-wider uppercase">
-          Dinner &amp; Award Night · 2026
-        </p>
+          {/* Ticket details — only show if valid */}
+          {isValid && ticket && (
+            <>
+              <div className="rounded-2xl border border-white/8 bg-[#0d0d0d] overflow-hidden">
+                {/* Gold header */}
+                <div className="bg-primary px-5 py-3 flex items-center justify-between">
+                  <span
+                    className="text-xs font-extrabold tracking-widest text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    CSC&apos;29
+                  </span>
+                  <span className="rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
+                    {tier?.name ?? ticket.tierId}
+                  </span>
+                </div>
+
+                {/* Details */}
+                <div className="divide-y divide-white/5 px-5 py-2">
+                  <Row icon={UserIcon} label="Attendee" value={ticket.name} />
+                  <Row
+                    icon={Ticket01Icon}
+                    label="Ticket Type"
+                    value={tier?.name ?? ticket.tierId}
+                    highlight
+                  />
+                  <Row icon={Calendar01Icon} label="Date" value="June 18, 2026" />
+                  <Row
+                    icon={Location01Icon}
+                    label="Venue"
+                    value="Antimaggies event center, Yoaco Ogbomosho"
+                  />
+                  <Row
+                    icon={Ticket01Icon}
+                    label="Amount Paid"
+                    value={`₦${(ticket.amount / 100).toLocaleString()}`}
+                  />
+                </div>
+
+                {/* Reference */}
+                <div className="border-t border-white/5 px-5 py-3 flex items-center justify-between">
+                  <span className="text-[10px] text-white/25 uppercase tracking-widest">
+                    Ref
+                  </span>
+                  <span className="font-mono text-xs text-white/30">
+                    {reference}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action buttons — hidden on print */}
+              <div className="no-print mt-4 flex flex-col gap-2">
+                <Link
+                  href={receiptUrl}
+                  className="inline-flex w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-black hover:bg-primary/80 transition-colors"
+                >
+                  View & Download Full Ticket
+                </Link>
+                <PrintTicketButton
+                  label="Print This Page"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Branding */}
+          <p className="no-print mt-6 text-center text-[10px] text-white/20 tracking-wider uppercase">
+            Dinner &amp; Award Night · 2026
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
