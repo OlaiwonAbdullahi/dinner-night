@@ -134,7 +134,15 @@ export function TicketCheckoutButton({
         body: JSON.stringify({
           email: values.email,
           amount: priceKobo,
-          metadata: { tierId, tierName, name: values.name },
+          metadata: {
+            type: "ticket",
+            tierId,
+            tierName,
+            quantity: 1,
+            name: values.name,
+            phone: values.phone ?? "",
+            department: values.department ?? "",
+          },
         }),
       })
       const data = await res.json()

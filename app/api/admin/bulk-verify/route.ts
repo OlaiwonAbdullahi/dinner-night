@@ -58,6 +58,7 @@ async function processReference(reference: string): Promise<BulkVerifyResult> {
           email: customer.email,
           name: (meta.name as string) ?? "",
           phone: (meta.phone as string) ?? "",
+          department: (meta.department as string) ?? null,
         },
       })
       return { reference, status: "verified", paystackStatus: "success", type: "ticket" }
