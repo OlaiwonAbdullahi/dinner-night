@@ -31,8 +31,11 @@ export type TicketTier = {
 
 export const VOTING_DEADLINE = new Date("2026-06-20T22:59:00.000Z");
 
+// Manual override — set to true to close voting immediately, regardless of the deadline.
+export const VOTING_MANUALLY_CLOSED = true;
+
 export function isVotingClosed(): boolean {
-  return Date.now() >= VOTING_DEADLINE.getTime();
+  return VOTING_MANUALLY_CLOSED || Date.now() >= VOTING_DEADLINE.getTime();
 }
 
 export const votingCategories: VotingCategory[] = [

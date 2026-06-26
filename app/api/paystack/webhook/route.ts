@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
         name?: string
         phone?: string
         tierId?: string
+        department?: string
       }
     }
   }
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
           email: customer.email,
           name: metadata.name ?? "",
           phone: metadata.phone ?? "",
+          department: metadata.department ?? null,
         },
       })
     } else {
