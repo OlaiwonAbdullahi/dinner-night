@@ -60,7 +60,7 @@ export function HeroSection() {
               color="currentColor"
               className="text-primary"
             />
-            June 18, 2026
+            July 4, 2026
           </span>
           <span className="hidden sm:block h-4 w-px bg-primary/20" />
           <span className="flex items-center gap-2 ">
@@ -71,7 +71,7 @@ export function HeroSection() {
               className="text-primary"
             />
             <span className="text-nowrap">
-              Antimaggies event center, Yoaco Ogbomosho
+              Ambassadors event center, Yoaco Ogbomosho
             </span>
           </span>
         </div>

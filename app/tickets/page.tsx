@@ -11,8 +11,10 @@ import {
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { TicketCheckoutButton } from "@/components/ticket-checkout-button";
+import { SponsorCheckoutButton } from "@/components/sponsor-checkout-button";
 import { ticketTiers } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { RegularTicketCard } from "@/components/regular-ticket-card";
 
 // Price in kobo (₦1 = 100 kobo)
 const TIER_PRICES_KOBO: Record<string, number> = {
@@ -71,7 +73,7 @@ export default function TicketsPage() {
                 color="currentColor"
                 className="text-primary"
               />
-              June 18, 2026
+              July 04, 2026
             </span>
             <span className="hidden sm:block h-4 w-px bg-primary/20" />
             <span className="flex items-center gap-2">
@@ -81,7 +83,7 @@ export default function TicketsPage() {
                 color="currentColor"
                 className="text-primary"
               />
-              Antimaggies event center, Yoaco Ogbomosho{" "}
+              Ambassadors event center, Yoaco Ogbomosho{" "}
             </span>
           </div>
         </div>
@@ -93,6 +95,12 @@ export default function TicketsPage() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 max-w-2xl mx-auto">
             {ticketTiers.map((tier) => {
               const TierIcon = tierIconMap[tier.id] ?? Ticket01Icon;
+
+              // Regular tier gets discount button
+              if (tier.id === "regular") {
+                return <RegularTicketCard key={tier.id} />
+              }
+
               return (
                 <div
                   key={tier.id}
@@ -109,63 +117,39 @@ export default function TicketsPage() {
                     </span>
                   )}
 
-                  {/* Icon + name */}
                   <div className="mb-4 flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl",
-                        tier.highlighted ? "bg-primary/20" : "bg-primary/10",
-                      )}
-                    >
-                      <HugeiconsIcon
-                        icon={TierIcon}
-                        size={18}
-                        color="currentColor"
-                        className="text-primary"
-                      />
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", tier.highlighted ? "bg-primary/20" : "bg-primary/10")}>
+                      <HugeiconsIcon icon={TierIcon} size={18} color="currentColor" className="text-primary" />
                     </div>
-                    <h2 className="font-extrabold text-white tracking-tight">
-                      {tier.name}
-                    </h2>
+                    <h2 className="font-extrabold text-white tracking-tight">{tier.name}</h2>
                   </div>
 
-                  {/* Price */}
                   <div className="mb-2">
-                    <span className="text-4xl font-extrabold text-primary leading-none">
-                      {tier.price}
-                    </span>
+                    <span className="text-4xl font-extrabold text-primary leading-none">{tier.price}</span>
                   </div>
-                  <p className="mb-6 text-xs text-white/35 leading-relaxed">
-                    {tier.description}
-                  </p>
+                  <p className="mb-6 text-xs text-white/35 leading-relaxed">{tier.description}</p>
 
-                  {/* Features */}
                   <ul className="mb-8 flex-1 space-y-2.5">
                     {tier.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-start gap-2 text-xs text-white/55"
-                      >
-                        <HugeiconsIcon
-                          icon={CheckmarkCircle01Icon}
-                          size={13}
-                          color="currentColor"
-                          className="text-primary shrink-0 mt-0.5"
-                        />
+                      <li key={f} className="flex items-start gap-2 text-xs text-white/55">
+                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={13} color="currentColor" className="text-primary shrink-0 mt-0.5" />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  {/* CTA */}
-                  <TicketCheckoutButton
-                    tierId={tier.id}
-                    tierName={tier.name}
-                    priceLabel={tier.price}
-                    priceKobo={TIER_PRICES_KOBO[tier.id] ?? 500000}
-                    ctaLabel={tier.cta}
-                    highlighted={tier.highlighted}
-                  />
+                  {tier.isSponsor ? (
+                    <SponsorCheckoutButton ctaLabel={tier.cta} />
+                  ) : (
+                    <TicketCheckoutButton
+                      tierId={tier.id}
+                      tierName={tier.name}
+                      priceLabel={tier.price}
+                      priceKobo={TIER_PRICES_KOBO[tier.id] ?? 500000}
+                      ctaLabel={tier.cta}
+                      highlighted={tier.highlighted}
+                    />
+                  )}
                 </div>
               );
             })}

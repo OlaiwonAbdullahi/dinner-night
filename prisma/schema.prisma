@@ -27,17 +27,21 @@ model Vote {
 }
 
 model Ticket {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  tierId    String
-  email     String
-  name      String
-  phone     String
-  quantity  Int
-  amount    Int
-  reference String   @unique
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  tierId     String
+  email      String
+  name       String
+  phone      String
+  department String?                        // ← ADD THIS
+  quantity   Int
+  amount     Int
+  reference  String   @unique
+  status     String   @default("pending")
+  checkedIn  Boolean  @default(false)   
+  checkedInAt DateTime?    
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([status])
 }

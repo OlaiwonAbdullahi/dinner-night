@@ -3,12 +3,13 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { CategoryVoteCard } from "@/components/category-vote-card"
-import { votingCategories } from "@/lib/data"
+import { votingCategories, isVotingClosed } from "@/lib/data"   // ← ADD isVotingClosed
 import { SectionHeader } from "@/components/home/section-header"
 import { AnimateIn } from "@/components/animate-in"
 
 export function VotingPreview() {
   const previewCategories = votingCategories.slice(0, 3)
+  const closed = isVotingClosed()   // ← ADD
 
   return (
     <section className="py-24 px-4">
@@ -22,7 +23,11 @@ export function VotingPreview() {
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {previewCategories.map((cat, idx) => (
             <AnimateIn key={cat.id} delay={idx * 120} direction="up">
-              <CategoryVoteCard category={cat} index={idx} />
+              <CategoryVoteCard
+                category={cat}
+                index={idx}
+                votingClosed={closed}   // ← ADD
+              />
             </AnimateIn>
           ))}
         </div>

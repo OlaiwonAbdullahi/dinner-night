@@ -31,6 +31,9 @@ async function getStats() {
       orderBy: { _sum: { quantity: "desc" } },
     }),
   ]);
+  const checkedInCount = await prisma.ticket.count({
+  where: { status: "paid", checkedIn: true },
+})
 
   return {
     totalVoteCount,
@@ -39,6 +42,8 @@ async function getStats() {
     totalTicketCount,
     ticketRevenueKobo: ticketRevenue._sum.amount ?? 0,
     voteResults,
+    checkedInCount,
+
   };
 }
 
@@ -69,6 +74,11 @@ export default async function AdminOverviewPage() {
       label: "Tickets Sold",
       value: stats.totalTicketCount.toLocaleString(),
       sub: `revenue: ${formatNaira(stats.ticketRevenueKobo)}`,
+    },
+    {
+      label: "Checked In",
+      value: `${stats.checkedInCount} / ${stats.totalTicketCount}`,
+      sub: "attendees at the venue",
     },
   ];
 

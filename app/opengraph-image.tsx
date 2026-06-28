@@ -133,7 +133,7 @@ export default async function Image() {
           {/* Info pills */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 22 }}>
             {[
-              { label: 'DATE', value: '18th JUNE' },
+              { label: 'DATE', value: '4th JULY' },
               { label: 'RED CARPET', value: '4:00 PM' },
               { label: 'MAIN EVENT', value: '5:00 PM' },
             ].map((item) => (
@@ -179,7 +179,7 @@ export default async function Image() {
           {/* Venue + dress code */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span style={{ color: '#aaa', fontSize: 15, fontWeight: 600, display: 'flex' }}>
-              ANTIMAGGIES
+              AMBASSADORS
             </span>
             <span style={{ color: 'rgba(201,162,39,0.4)', fontSize: 20, display: 'flex' }}>|</span>
             <span style={{ color: '#666', fontSize: 14, display: 'flex' }}>

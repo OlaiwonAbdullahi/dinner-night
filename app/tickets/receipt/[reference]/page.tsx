@@ -109,12 +109,16 @@ export default async function TicketReceiptPage({
                 <Detail label="Date" value="June 18, 2026" />
                 <Detail
                   label="Venue"
-                  value="Antimaggies event center, Yoaco Ogbomosho"
+                  value="Ambassadors event center, Yoaco Ogbomosho"
                 />
                 <Detail
                   label="Amount Paid"
                   value={`₦${(ticket.amount / 100).toLocaleString()}`}
                 />
+                {ticket.department && (
+  <Detail label="Department" value={ticket.department} />
+)} 
+                
               </div>
 
               {/* Right: QR + ticket no */}
