@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  Ticket01Icon,
   CrownIcon,
   HeartIcon,
   CheckmarkCircle01Icon,
@@ -10,6 +9,7 @@ import {
 import { ticketTiers } from "@/lib/data"
 import { SectionHeader } from "@/components/home/section-header"
 import { AnimateIn } from "@/components/animate-in"
+import { RegularTicketCard } from "@/components/regular-ticket-card"   // ← ADD
 import { TicketCheckoutButton } from "@/components/ticket-checkout-button"
 import { SponsorCheckoutButton } from "@/components/sponsor-checkout-button"
 import { Button } from "@/components/ui/button"
@@ -17,15 +17,12 @@ import { cn } from "@/lib/utils"
 import type { IconSvgElement } from "@hugeicons/react"
 
 const ticketIconMap: Record<string, IconSvgElement> = {
-  regular: Ticket01Icon,
   volunteer: CrownIcon,
   sponsor: HeartIcon,
 }
 
-// kobo prices for non-sponsor tiers
 const ticketPriceMap: Record<string, number> = {
-  regular: 500000,   // ₦5,000
-  volunteer: 1000000, // ₦10,000
+  volunteer: 1000000,
 }
 
 export function TicketsPreview() {
@@ -42,7 +39,16 @@ export function TicketsPreview() {
 
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
           {previewTiers.map((tier, i) => {
-            const TierIcon = ticketIconMap[tier.id] ?? Ticket01Icon
+            // Regular tier gets its own client component with discount
+            if (tier.id === "regular") {
+              return (
+                <AnimateIn key={tier.id} delay={i * 120} direction="up">
+                  <RegularTicketCard />
+                </AnimateIn>
+              )
+            }
+
+            const TierIcon = ticketIconMap[tier.id] ?? HeartIcon
             return (
               <AnimateIn key={tier.id} delay={i * 120} direction="up">
                 <div
@@ -94,7 +100,6 @@ export function TicketsPreview() {
                     ))}
                   </ul>
 
-                  {/* Sponsor tier → custom amount picker */}
                   {tier.isSponsor ? (
                     <SponsorCheckoutButton ctaLabel={tier.cta} />
                   ) : (

@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const { email, amount, metadata, callback_url } = await req.json()
 
     if (!email || !amount) {
-      return NextResponse.json({ error: "email and amount are required" }, { status: 400 })
+      return NextResponse .json({ error: "email and amount are required" }, { status: 400 })
     }
 
     const reference = `DNA-${Date.now()}-${randomUUID().slice(0, 8).toUpperCase()}`

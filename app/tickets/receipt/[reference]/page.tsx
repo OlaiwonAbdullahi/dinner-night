@@ -109,7 +109,7 @@ export default async function TicketReceiptPage({
                 <Detail label="Date" value="June 18, 2026" />
                 <Detail
                   label="Venue"
-                  value="Antimaggies event center, Yoaco Ogbomosho"
+                  value="Ambassadors event center, Yoaco Ogbomosho"
                 />
                 <Detail
                   label="Amount Paid"

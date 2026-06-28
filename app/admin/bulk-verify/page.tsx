@@ -20,9 +20,7 @@ function StatusBadge({ status }: { status: BulkVerifyResult["status"] }) {
     failed: "bg-red-500/10 text-red-400 border-red-500/20",
   }
   return (
-    <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${map[status]}`}
-    >
+    <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${map[status]}`}>
       {status}
     </span>
   )
@@ -61,7 +59,16 @@ export default function BulkVerifyPage() {
         setState("error")
         return
       }
-      setResponse(json as BulkVerifyResponse)
+      const full = json as BulkVerifyResponse
+      // Filter to tickets only
+      const ticketResults = full.results.filter((r) => r.type === "ticket" || r.status === "failed")
+      const summary = {
+        total: ticketResults.length,
+        verified: ticketResults.filter((r) => r.status === "verified").length,
+        skipped: ticketResults.filter((r) => r.status === "skipped").length,
+        failed: ticketResults.filter((r) => r.status === "failed").length,
+      }
+      setResponse({ summary, results: ticketResults })
       setState("done")
     } catch (err) {
       setError(String(err))
@@ -75,43 +82,22 @@ export default function BulkVerifyPage() {
   return (
     <div className="p-6 md:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-white">Bulk Verify</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-white">Bulk Verify Tickets</h1>
         <p className="mt-1 text-sm text-white/40">
-          Export transactions from Paystack, upload the CSV, and sync them to the database.
+          Export ticket transactions from Paystack, upload the CSV, and sync them to the database.
         </p>
       </div>
 
-      {/* Upload area */}
       <div
-        className={`mb-6 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-10 transition-colors ${
-          dragging
-            ? "border-primary/60 bg-primary/5"
-            : "border-white/10 bg-white/2 hover:border-white/20"
+        className={`mb-6 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-10 transition-colors cursor-pointer ${
+          dragging ? "border-primary/60 bg-primary/5" : "border-white/10 bg-white/2 hover:border-white/20"
         }`}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragging(true)
-        }}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault()
-          setDragging(false)
-          const f = e.dataTransfer.files[0]
-          if (f) pickFile(f)
-        }}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) pickFile(f) }}
         onClick={() => inputRef.current?.click()}
-        style={{ cursor: "pointer" }}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".csv"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if (f) pickFile(f)
-          }}
-        />
+        <input ref={inputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f) }} />
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5">
           <HugeiconsIcon icon={Upload01Icon} size={22} color="currentColor" className="text-white/40" />
         </div>
@@ -141,19 +127,12 @@ export default function BulkVerifyPage() {
         className="mb-8 flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-black transition-opacity disabled:opacity-40"
       >
         {state === "loading" ? (
-          <>
-            <HugeiconsIcon icon={Loading03Icon} size={15} color="currentColor" className="animate-spin" />
-            Verifying…
-          </>
+          <><HugeiconsIcon icon={Loading03Icon} size={15} color="currentColor" className="animate-spin" />Verifying…</>
         ) : (
-          <>
-            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} color="currentColor" />
-            Run Verification
-          </>
+          <><HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} color="currentColor" />Run Verification</>
         )}
       </button>
 
-      {/* Summary cards */}
       {summary && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
@@ -170,12 +149,11 @@ export default function BulkVerifyPage() {
         </div>
       )}
 
-      {/* Results table */}
       {results.length > 0 && (
         <div className="rounded-2xl border border-white/8 bg-card overflow-hidden">
           <div className="border-b border-white/5 px-4 py-3 flex items-center gap-2">
             <HugeiconsIcon icon={InformationCircleIcon} size={14} color="currentColor" className="text-white/30" />
-            <span className="text-xs font-bold text-white/40 uppercase tracking-wide">Results</span>
+            <span className="text-xs font-bold text-white/40 uppercase tracking-wide">Ticket Results</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -183,7 +161,6 @@ export default function BulkVerifyPage() {
                 <tr className="border-b border-white/5">
                   <th className="px-4 py-2.5 text-left font-bold text-white/25 uppercase tracking-wider">Reference</th>
                   <th className="px-4 py-2.5 text-left font-bold text-white/25 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-2.5 text-left font-bold text-white/25 uppercase tracking-wider">Type</th>
                   <th className="px-4 py-2.5 text-left font-bold text-white/25 uppercase tracking-wider">Detail</th>
                 </tr>
               </thead>
@@ -191,13 +168,8 @@ export default function BulkVerifyPage() {
                 {results.map((r) => (
                   <tr key={r.reference} className="hover:bg-white/2 transition-colors">
                     <td className="px-4 py-2.5 font-mono text-white/60 max-w-[200px] truncate">{r.reference}</td>
-                    <td className="px-4 py-2.5">
-                      <StatusBadge status={r.status} />
-                    </td>
-                    <td className="px-4 py-2.5 text-white/40 capitalize">{r.type ?? "—"}</td>
-                    <td className="px-4 py-2.5 text-white/30 max-w-[280px] truncate">
-                      {r.error ?? r.paystackStatus ?? "—"}
-                    </td>
+                    <td className="px-4 py-2.5"><StatusBadge status={r.status} /></td>
+                    <td className="px-4 py-2.5 text-white/30 max-w-[280px] truncate">{r.error ?? r.paystackStatus ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

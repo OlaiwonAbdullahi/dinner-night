@@ -16,12 +16,15 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+const TIER_PRICES_KOBO: Record<string, number> = {
+  regular: 500000,
+  volunteer: 1000000,
+}
+
 async function getOrRecoverTicket(reference: string) {
-  // 1. Check DB first
   const existing = await prisma.ticket.findUnique({ where: { reference } })
   if (existing) return existing
 
-  // 2. Not in DB — try Paystack
   try {
     const tx = await verifyTransaction(reference)
     if (tx.status !== "success") return null
@@ -30,11 +33,13 @@ async function getOrRecoverTicket(reference: string) {
       tierId?: string
       name?: string
       phone?: string
+      department?: string
     } | null
 
     if (!meta?.tierId) return null
 
-    // Record it now
+    const amount = TIER_PRICES_KOBO[meta.tierId] ?? tx.amount
+
     const ticket = await prisma.ticket.upsert({
       where: { reference },
       update: { status: "paid" },
@@ -43,10 +48,11 @@ async function getOrRecoverTicket(reference: string) {
         status: "paid",
         tierId: meta.tierId,
         quantity: 1,
-        amount: tx.amount,
+        amount,
         email: tx.customer.email,
         name: meta.name ?? tx.customer.email,
         phone: meta.phone ?? "",
+        department: meta.department ?? null,
       },
     })
     return ticket
@@ -65,14 +71,10 @@ export default async function VerifyPage({
   const ticket = await getOrRecoverTicket(reference)
   const tier = ticket ? ticketTiers.find((t) => t.id === ticket.tierId) : null;
   const isValid = !!ticket && ticket.status === "paid";
-
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
-    "https://dinner.eventsnest.xyz";
   const receiptUrl = `/tickets/receipt/${reference}`;
+
   return (
     <>
-      {/* Print styles */}
       <style>{`
         @media print {
           .no-print { display: none !important; }
@@ -83,12 +85,10 @@ export default async function VerifyPage({
       <div className="flex min-h-screen items-center justify-center bg-black px-4 py-12">
         <div className="w-full max-w-sm">
 
-          {/* Search form — hidden on print */}
           <div className="no-print">
             <VerifyTicketForm />
           </div>
 
-          {/* Status banner */}
           <div
             className={`mb-6 flex flex-col items-center gap-3 rounded-3xl p-8 text-center border ${
               isValid
@@ -96,11 +96,7 @@ export default async function VerifyPage({
                 : "border-red-500/30 bg-red-500/10"
             }`}
           >
-            <div
-              className={`flex h-20 w-20 items-center justify-center rounded-full ${
-                isValid ? "bg-green-500/20" : "bg-red-500/20"
-              }`}
-            >
+            <div className={`flex h-20 w-20 items-center justify-center rounded-full ${isValid ? "bg-green-500/20" : "bg-red-500/20"}`}>
               <HugeiconsIcon
                 icon={isValid ? CheckmarkCircle01Icon : CancelCircleIcon}
                 size={44}
@@ -109,11 +105,7 @@ export default async function VerifyPage({
               />
             </div>
             <div>
-              <p
-                className={`text-2xl font-extrabold tracking-tight ${
-                  isValid ? "text-green-400" : "text-red-400"
-                }`}
-              >
+              <p className={`text-2xl font-extrabold tracking-tight ${isValid ? "text-green-400" : "text-red-400"}`}>
                 {isValid ? "VALID TICKET" : "INVALID TICKET"}
               </p>
               <p className="mt-1 text-sm text-white/40">
@@ -126,16 +118,11 @@ export default async function VerifyPage({
             </div>
           </div>
 
-          {/* Ticket details — only show if valid */}
           {isValid && ticket && (
             <>
               <div className="rounded-2xl border border-white/8 bg-[#0d0d0d] overflow-hidden">
-                {/* Gold header */}
                 <div className="bg-primary px-5 py-3 flex items-center justify-between">
-                  <span
-                    className="text-xs font-extrabold tracking-widest text-black"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
+                  <span className="text-xs font-extrabold tracking-widest text-black" style={{ fontFamily: "var(--font-display)" }}>
                     CSC&apos;29
                   </span>
                   <span className="rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
@@ -143,40 +130,23 @@ export default async function VerifyPage({
                   </span>
                 </div>
 
-                {/* Details */}
                 <div className="divide-y divide-white/5 px-5 py-2">
                   <Row icon={UserIcon} label="Attendee" value={ticket.name} />
-                  <Row
-                    icon={Ticket01Icon}
-                    label="Ticket Type"
-                    value={tier?.name ?? ticket.tierId}
-                    highlight
-                  />
+                  <Row icon={Ticket01Icon} label="Ticket Type" value={tier?.name ?? ticket.tierId} highlight />
                   <Row icon={Calendar01Icon} label="Date" value="June 18, 2026" />
-                  <Row
-                    icon={Location01Icon}
-                    label="Venue"
-                    value="Antimaggies event center, Yoaco Ogbomosho"
-                  />
-                  <Row
-                    icon={Ticket01Icon}
-                    label="Amount Paid"
-                    value={`₦${(ticket.amount / 100).toLocaleString()}`}
-                  />
+                  <Row icon={Location01Icon} label="Venue" value="Ambassadors event center, Yoaco Ogbomosho" />
+                  <Row icon={Ticket01Icon} label="Amount Paid" value={`₦${(ticket.amount / 100).toLocaleString()}`} />
+                  {ticket.department && (
+                    <Row icon={UserIcon} label="Department" value={ticket.department} />
+                  )}
                 </div>
 
-                {/* Reference */}
                 <div className="border-t border-white/5 px-5 py-3 flex items-center justify-between">
-                  <span className="text-[10px] text-white/25 uppercase tracking-widest">
-                    Ref
-                  </span>
-                  <span className="font-mono text-xs text-white/30">
-                    {reference}
-                  </span>
+                  <span className="text-[10px] text-white/25 uppercase tracking-widest">Ref</span>
+                  <span className="font-mono text-xs text-white/30">{reference}</span>
                 </div>
               </div>
 
-              {/* Action buttons — hidden on print */}
               <div className="no-print mt-4 flex flex-col gap-2">
                 <Link
                   href={receiptUrl}
@@ -184,14 +154,11 @@ export default async function VerifyPage({
                 >
                   View & Download Full Ticket
                 </Link>
-                <PrintTicketButton
-                  label="Print This Page"
-                />
+                <PrintTicketButton label="Print This Page" />
               </div>
             </>
           )}
 
-          {/* Branding */}
           <p className="no-print mt-6 text-center text-[10px] text-white/20 tracking-wider uppercase">
             Dinner &amp; Award Night · 2026
           </p>
@@ -202,10 +169,7 @@ export default async function VerifyPage({
 }
 
 function Row({
-  icon,
-  label,
-  value,
-  highlight,
+  icon, label, value, highlight,
 }: {
   icon: typeof UserIcon;
   label: string;
@@ -214,21 +178,10 @@ function Row({
 }) {
   return (
     <div className="flex items-start gap-3 py-3">
-      <HugeiconsIcon
-        icon={icon}
-        size={15}
-        color="currentColor"
-        className="text-primary mt-0.5 shrink-0"
-      />
+      <HugeiconsIcon icon={icon} size={15} color="currentColor" className="text-primary mt-0.5 shrink-0" />
       <div className="min-w-0">
-        <p className="text-[10px] text-white/25 uppercase tracking-widest">
-          {label}
-        </p>
-        <p
-          className={`text-sm font-semibold mt-0.5 ${highlight ? "text-primary" : "text-white"}`}
-        >
-          {value}
-        </p>
+        <p className="text-[10px] text-white/25 uppercase tracking-widest">{label}</p>
+        <p className={`text-sm font-semibold mt-0.5 ${highlight ? "text-primary" : "text-white"}`}>{value}</p>
       </div>
     </div>
   );

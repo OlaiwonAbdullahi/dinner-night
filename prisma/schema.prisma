@@ -37,6 +37,9 @@ model Ticket {
   amount     Int
   reference  String   @unique
   status     String   @default("pending")
+  checkedIn  Boolean  @default(false)   
+  checkedInAt DateTime?    
+  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

@@ -63,7 +63,7 @@ export default function Footer() {
                   color="currentColor"
                   className="text-primary mt-0.5 shrink-0"
                 />
-                June 18, 2026
+                July 4, 2026
               </li>
               <li className="flex items-start gap-2 text-sm text-white/40">
                 <HugeiconsIcon
@@ -72,7 +72,7 @@ export default function Footer() {
                   color="currentColor"
                   className="text-primary mt-0.5 shrink-0"
                 />
-                Antimaggies event center, Yoaco Ogbomosho{" "}
+                Ambassadors event center, Yoaco Ogbomosho{" "}
               </li>
             </ul>
           </div>

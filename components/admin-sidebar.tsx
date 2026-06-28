@@ -12,6 +12,7 @@ import {
   Cancel01Icon,
   CheckmarkBadge01Icon,
   Building04Icon,
+  QrCode01Icon
 } from "@hugeicons/core-free-icons"
 import { AdminLogoutButton } from "@/components/admin-logout-button"
 import { cn } from "@/lib/utils"
@@ -21,6 +22,8 @@ const navItems = [
   { href: "/admin/votes", label: "Votes", icon: ThumbsUpIcon },
   { href: "/admin/tickets", label: "Tickets", icon: Ticket01Icon },
   { href: "/admin/bulk-verify", label: "Bulk Verify", icon: CheckmarkBadge01Icon },
+  { href: "/admin/ticket-scanner",       label: "Ticket Scanner",        icon: QrCode01Icon },      // ← ADD
+
     // { href: "/admin/department-ticket", label: "Department Tickets",  icon: Building04Icon }, 
 ]
 
