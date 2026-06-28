@@ -11,6 +11,7 @@ import {
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { TicketCheckoutButton } from "@/components/ticket-checkout-button";
+import { SponsorCheckoutButton } from "@/components/sponsor-checkout-button";
 import { ticketTiers } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -158,14 +159,18 @@ export default function TicketsPage() {
                   </ul>
 
                   {/* CTA */}
-                  <TicketCheckoutButton
-                    tierId={tier.id}
-                    tierName={tier.name}
-                    priceLabel={tier.price}
-                    priceKobo={TIER_PRICES_KOBO[tier.id] ?? 500000}
-                    ctaLabel={tier.cta}
-                    highlighted={tier.highlighted}
-                  />
+                  {tier.isSponsor ? (
+                    <SponsorCheckoutButton ctaLabel={tier.cta} />
+                  ) : (
+                    <TicketCheckoutButton
+                      tierId={tier.id}
+                      tierName={tier.name}
+                      priceLabel={tier.price}
+                      priceKobo={TIER_PRICES_KOBO[tier.id] ?? 500000}
+                      ctaLabel={tier.cta}
+                      highlighted={tier.highlighted}
+                    />
+                  )}
                 </div>
               );
             })}

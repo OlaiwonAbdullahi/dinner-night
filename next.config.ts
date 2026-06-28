@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         hostname: "tapback.co",
         pathname: "/api/avatar/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.qrserver.com",
+      },
     ],
   },
 };
